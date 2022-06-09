@@ -10,6 +10,7 @@ import (
 // Config
 type Config struct {
 	Server ServerConfig `yaml:"server"`
+	Logger Logger       `yaml:"logger"`
 }
 
 // Server config struct
@@ -24,9 +25,17 @@ type ServerConfig struct {
 	CtxDefaultTimeout int    `yaml:"CtxDefaultTimeout"`
 }
 
+type Logger struct {
+	Development       bool
+	DisableCaller     bool
+	DisableStacktrace bool
+	Encoding          string
+	Level             string
+}
+
 var (
 	config *Config
-	once sync.Once
+	once   sync.Once
 )
 
 // Get the config file

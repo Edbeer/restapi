@@ -7,3 +7,10 @@ server:
   WriteTimeout: 10
   SSL: true
   CtxDefaultTimeout: 12
+
+logger:
+  Development: true
+  DisableCaller: false
+  DisableStacktrace: false
+  Encoding: json
+  Level: info
