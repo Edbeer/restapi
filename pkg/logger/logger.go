@@ -47,6 +47,15 @@ var loggerLevelMap = map[string]zapcore.Level{
 	"fatal":  zapcore.FatalLevel,
 }
 
+func (l *apiLogger) getLoggerLevel(cfg *config.Config) zapcore.Level {
+	level, ok := loggerLevelMap[cfg.Logger.Level]
+	if !ok {
+		return zapcore.DebugLevel
+	}
+
+	return level
+}
+
 // Init Logger
 func (l *apiLogger) InitLogger() {
 	logLevel := l.getLoggerLevel(l.cfg)
@@ -81,15 +90,6 @@ func (l *apiLogger) InitLogger() {
 	if err := l.sugarLogger.Sync(); err != nil {
 		l.sugarLogger.Error(err)
 	}
-}
-
-func (l *apiLogger) getLoggerLevel(cfg *config.Config) zapcore.Level {
-	level, ok := loggerLevelMap[cfg.Logger.Level]
-	if !ok {
-		return zapcore.DebugLevel
-	}
-
-	return level
 }
 
 // Logger methods

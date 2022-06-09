@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"github.com/Edbeer/restapi/config"
+	"github.com/Edbeer/restapi/pkg/logger"
+	server "github.com/Edbeer/restapi/internal/transport/rest"
+)
 
 func main() {
-	fmt.Println("1")
+	cfg := config.GetConfig()
+	logger := logger.NewApiLogger(cfg)
+
+	logger.InitLogger()
+	logger.Info("Starting auth server")
+	s := server.NewServer(cfg, logger)
+	logger.Fatal(s.Run())
 }
