@@ -13,5 +13,7 @@ func main() {
 	logger.InitLogger()
 	logger.Info("Starting auth server")
 	s := server.NewServer(cfg, logger)
-	logger.Fatal(s.Run())
+	if err := s.Run(); err != nil {
+		logger.Fatal(err)
+	}
 }
