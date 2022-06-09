@@ -1,0 +1,9 @@
+server:
+  Port: :5000
+  Mode: DEVELOPMENT
+  JwtSecretKey: secretkey
+  CookieName: jwt-token
+  ReadTimeout: 10
+  WriteTimeout: 10
+  SSL: true
+  CtxDefaultTimeout: 12
