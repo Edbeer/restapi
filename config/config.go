@@ -9,8 +9,9 @@ import (
 
 // Config
 type Config struct {
-	Server ServerConfig `yaml:"server"`
-	Logger Logger       `yaml:"logger"`
+	Server   ServerConfig   `yaml:"server"`
+	Logger   Logger         `yaml:"logger"`
+	Postgres PostgresConfig `yaml:"postgres"`
 }
 
 // Server config struct
@@ -23,6 +24,17 @@ type ServerConfig struct {
 	WriteTimeout      int    `yaml:"WriteTimeout"`
 	SSL               bool   `yaml:"SSL"`
 	CtxDefaultTimeout int    `yaml:"CtxDefaultTimeout"`
+}
+
+// Postgresql config
+type PostgresConfig struct {
+	PostgresqlHost     string
+	PostgresqlPort     string
+	PostgresqlUser     string
+	PostgresqlPassword string
+	PostgresqlDbname   string
+	PostgresqlSSLMode  bool
+	PgDriver           string
 }
 
 type Logger struct {

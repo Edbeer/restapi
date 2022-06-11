@@ -8,6 +8,15 @@ server:
   SSL: true
   CtxDefaultTimeout: 12
 
+postgres:
+  PostgresqlHost: localhost
+  PostgresqlPort: 5432
+  PostgresqlUser: postgres
+  PostgresqlPassword: postgres
+  PostgresqlDbname: auth_db
+  PostgresqlSslmode: false
+  PgDriver: pgx
+
 logger:
   Development: true
   DisableCaller: false

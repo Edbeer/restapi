@@ -24,6 +24,13 @@ type AuthHandler struct {
 	logger logger.Logger
 }
 
+// func (h *AuthHandler) initAuthHandlers(g *echo.Group) {
+// 	authGroup := g.Group("/auth")
+// 	{
+// 		authGroup.POST("/register",)
+// 	}
+// }
+
 // Map auth routes
 func MapAuthRoutes(ag *echo.Group, h Handlers, cfg *config.Config, l logger.Logger) {
 	ag.GET("/:user_id", h.GetUserByID())

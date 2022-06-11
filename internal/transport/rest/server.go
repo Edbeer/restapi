@@ -7,21 +7,23 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/pkg/logger"
+	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
 	echo   *echo.Echo
 	config *config.Config
+	psqlDB *pgxpool.Pool
 	logger logger.Logger
 }
 
 
 // New server constructor
-func NewServer(config *config.Config, logger logger.Logger) *Server {
-	return &Server{echo: echo.New(), config: config, logger: logger}
+func NewServer(config *config.Config, psqlDB *pgxpool.Pool, logger logger.Logger) *Server {
+	return &Server{echo: echo.New(), psqlDB: psqlDB, config: config, logger: logger}
 }
 
 // Run server depends on config SSL option
