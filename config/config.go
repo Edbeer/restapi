@@ -12,6 +12,7 @@ type Config struct {
 	Server   ServerConfig   `yaml:"server"`
 	Logger   Logger         `yaml:"logger"`
 	Postgres PostgresConfig `yaml:"postgres"`
+	Redis    RedisConfig    `yaml:"redis"`
 }
 
 // Server config struct
@@ -28,21 +29,33 @@ type ServerConfig struct {
 
 // Postgresql config
 type PostgresConfig struct {
-	PostgresqlHost     string
-	PostgresqlPort     string
-	PostgresqlUser     string
-	PostgresqlPassword string
-	PostgresqlDbname   string
-	PostgresqlSSLMode  bool
-	PgDriver           string
+	PostgresqlHost     string `yaml:"PostgresqlHost"`
+	PostgresqlPort     string `yaml:"PostgresqlPort"`
+	PostgresqlUser     string `yaml:"PostgresqlUser"`
+	PostgresqlPassword string `yaml:"PostgresqlPassword"`
+	PostgresqlDbname   string `yaml:"PostgresqlDbname"`
+	PostgresqlSSLMode  bool   `yaml:"PostgresqlSSLMode"`
+	PgDriver           string `yaml:"PgDriver"`
+}
+
+type RedisConfig struct {
+	RedisAddr      string `yaml:"RedisAddr"`
+	RedisPassword  string `yaml:"RedisPassword"`
+	RedisDB        string `yaml:"RedisDB"`
+	RedisDefaultdb string `yaml:"RedisDefaultdb"`
+	MinIdleConns   int    `yaml:"MinIdleConns"`
+	PoolSize       int    `yaml:"PoolSize"`
+	PoolTimeout    int    `yaml:"PoolTimeout"`
+	Password       string `yaml:"Password"`
+	DB             int    `yaml:"DB"`
 }
 
 type Logger struct {
-	Development       bool
-	DisableCaller     bool
-	DisableStacktrace bool
-	Encoding          string
-	Level             string
+	Development       bool   `yaml:"Development"`
+	DisableCaller     bool   `yaml:"DisableCaller"`
+	DisableStacktrace bool   `yaml:"DisableStacktrace"`
+	Encoding          string `yaml:"Encoding"`
+	Level             string `yaml:"Level"`
 }
 
 var (

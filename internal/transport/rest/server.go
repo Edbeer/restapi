@@ -14,16 +14,15 @@ import (
 )
 
 type Server struct {
-	echo   *echo.Echo
-	config *config.Config
-	psqlDB *pgxpool.Pool
-	logger logger.Logger
+	echo       *echo.Echo
+	config     *config.Config
+	psqlClient *pgxpool.Pool
+	logger     logger.Logger
 }
 
-
 // New server constructor
-func NewServer(config *config.Config, psqlDB *pgxpool.Pool, logger logger.Logger) *Server {
-	return &Server{echo: echo.New(), psqlDB: psqlDB, config: config, logger: logger}
+func NewServer(config *config.Config, psqlClient *pgxpool.Pool, logger logger.Logger) *Server {
+	return &Server{echo: echo.New(), psqlClient: psqlClient, config: config, logger: logger}
 }
 
 // Run server depends on config SSL option
@@ -52,7 +51,7 @@ func (s *Server) Run() error {
 
 		<-quit
 
-		ctx, shutdown := context.WithTimeout(context.Background(), 5 * time.Second)
+		ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
 		defer shutdown()
 
 		s.logger.Info("Server Exited Properly")
@@ -76,7 +75,7 @@ func (s *Server) Run() error {
 				s.logger.Fatalf("Error starting Server: %v", err)
 			}
 		}()
-		
+
 		// Graceful shutdown
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, os.Interrupt)

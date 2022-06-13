@@ -6,9 +6,18 @@ import (
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgconn"
 )
 
-func NewPsqlDB(c *config.Config) (*pgxpool.Pool, error) {
+type Client interface {
+	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
+	Begin(ctx context.Context) (pgx.Tx, error)
+}
+
+func NewPsqlClient(c *config.Config) (*pgxpool.Pool, error) {
 	dataSourceName := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
 		c.Postgres.PostgresqlUser,
 		c.Postgres.PostgresqlPassword,
@@ -17,14 +26,14 @@ func NewPsqlDB(c *config.Config) (*pgxpool.Pool, error) {
 		c.Postgres.PostgresqlDbname,
 	)
 
-	db, err := pgxpool.Connect(context.Background(), dataSourceName)
+	pool, err := pgxpool.Connect(context.Background(), dataSourceName)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = db.Ping(context.Background()); err != nil {
+	if err = pool.Ping(context.Background()); err != nil {
 		return nil, err
 	}
 
-	return db, nil
+	return pool, nil
 }
