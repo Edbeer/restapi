@@ -1,11 +1,21 @@
 package rest
 
 import (
+	"github.com/Edbeer/restapi/internal/service"
+	"github.com/Edbeer/restapi/internal/transport/rest/v1"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func (s *Server) MapHandlers(e *echo.Echo) error {
+type Handlers struct {
+	service *service.Services
+}
+
+func NewHandlers(service *service.Services) *Handlers {
+	return &Handlers{service: service}
+}
+
+func (h *Handlers) Init(e *echo.Echo) error {
 	// echo.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
@@ -26,14 +36,15 @@ func (s *Server) MapHandlers(e *echo.Echo) error {
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
 
-	v1 := e.Group("/v1")
-
-	health := v1.Group("/health")
-	{
-		health.GET("", func(c echo.Context) error {
-			return c.JSON(200, map[string]string{"status": "OK"})
-		})
-	}
+	h.initApi(e)
 
 	return nil
+}
+
+func (h *Handlers) initApi(e *echo.Echo) {
+	handlerV1 := v1.NewHandlers(h.service)
+	api := e.Group("/api")
+	{
+		handlerV1.InitHandlers(api)
+	}
 }

@@ -3,22 +3,18 @@ package service
 import (
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/pkg/logger"
+	"github.com/Edbeer/restapi/internal/storage"
 )
-
-// user storage interface
-type AuthStorage interface {
-	Create() error
-}
 
 // Auth service
 type AuthService struct {
 	logger *logger.Logger
 	config *config.Config
-	storage AuthStorage
+	storage storage.AuthStorage
 }
 
 // Auth service constructor
-func NewAuthService(logger *logger.Logger, config *config.Config, storage AuthStorage) *AuthService {
+func NewAuthService(logger *logger.Logger, config *config.Config, storage storage.AuthStorage) *AuthService {
 	return &AuthService{logger: logger, config: config, storage: storage}
 }
 
