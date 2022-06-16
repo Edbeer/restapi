@@ -7,24 +7,26 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/Edbeer/restapi/internal/transport/rest"
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/service"
+	"github.com/Edbeer/restapi/internal/transport/rest"
 	"github.com/Edbeer/restapi/pkg/logger"
+	"github.com/go-redis/redis/v9"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
-	echo       *echo.Echo
-	config     *config.Config
-	psqlClient *pgxpool.Pool
-	logger     logger.Logger
+	echo        *echo.Echo
+	config      *config.Config
+	psqlClient  *pgxpool.Pool
+	redisClient *redis.Client
+	logger      logger.Logger
 }
 
 // New server constructor
-func NewServer(config *config.Config, psqlClient *pgxpool.Pool, logger logger.Logger) *Server {
-	return &Server{echo: echo.New(), psqlClient: psqlClient, config: config, logger: logger}
+func NewServer(config *config.Config, psqlClient *pgxpool.Pool, redisClient *redis.Client, logger logger.Logger) *Server {
+	return &Server{echo: echo.New(), psqlClient: psqlClient, redisClient: redisClient, config: config, logger: logger}
 }
 
 // Run server depends on config SSL option

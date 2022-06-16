@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/server"
 	"github.com/Edbeer/restapi/pkg/db/postgres"
@@ -11,13 +13,16 @@ import (
 func main() {
 	cfg := config.GetConfig()
 	logger := logger.NewApiLogger(cfg)
+	logger.InitLogger()
 
 	// postgresql
 	psqlClient, err := postgres.NewPsqlClient(cfg)
 	if err != nil {
-		logger.Fatalf("Postgresql init: %s", err)
+		// logger.Fatalf("Postgresql init: %s", err)
+		log.Fatal(err)
 	} else {
-		logger.Infof("Postgres connected, Status: %#v", psqlClient.Stat())
+		// logger.Infof("Postgres connected, Status: %#v", psqlClient.Stat())
+		log.Println(psqlClient.Stat())
 	}
 	defer psqlClient.Close()
 
@@ -26,9 +31,8 @@ func main() {
 	defer redisClient.Close()
 	logger.Info("Redis connetcted")
 
-	logger.InitLogger()
 	logger.Info("Starting auth server")
-	s := server.NewServer(cfg, psqlClient, logger)
+	s := server.NewServer(cfg, psqlClient, redisClient, logger)
 	if err := s.Run(); err != nil {
 		logger.Fatal(err)
 	}

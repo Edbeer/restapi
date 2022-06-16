@@ -30,3 +30,4 @@ vendor
 # Avatars storage directory
 avatars/
 .vscode
+dump.rdb

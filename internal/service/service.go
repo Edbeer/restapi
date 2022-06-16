@@ -15,7 +15,7 @@ type Services struct {
 }
 
 type Deps struct {
-	Storage *storage.Storage
+	Storage storage.Storage
 	Config  *config.Config
 }
 

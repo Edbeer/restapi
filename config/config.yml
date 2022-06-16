@@ -11,7 +11,7 @@ server:
 postgres:
   PostgresqlHost: localhost
   PostgresqlPort: 5432
-  PostgresqlUser: postgres
+  PostgresqlUser: pasha
   PostgresqlPassword: postgres
   PostgresqlDbname: auth_db
   PostgresqlSSLMode: false
