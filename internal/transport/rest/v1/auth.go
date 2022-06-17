@@ -4,6 +4,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Auth Service interface
+type Auth interface {
+	Create() echo.HandlerFunc
+	GetUserByID() echo.HandlerFunc
+}
+
 func (h *Handlers) initAuthHandlers(g *echo.Group) {
 	authGroup := g.Group("/auth")
 	{

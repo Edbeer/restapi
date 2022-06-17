@@ -2,25 +2,22 @@ package service
 
 import (
 	"github.com/Edbeer/restapi/config"
-	"github.com/Edbeer/restapi/internal/storage"
+	"github.com/Edbeer/restapi/internal/storage/psql"
+	"github.com/Edbeer/restapi/internal/storage/redis"
 )
 
-// Auth Service interface
-type Auth interface {
-	Create() error
-}
-
 type Services struct {
-	Auth Auth
+	Auth *AuthService
 }
 
 type Deps struct {
-	Storage storage.Storage
-	Config  *config.Config
+	StoragePsql  psql.Storage
+	StorageRedis redis.Storage
+	Config       *config.Config
 }
 
 func NewService(deps Deps) *Services {
-	authService := NewAuthService(deps.Config, deps.Storage.Auth)
+	authService := NewAuthService(deps.Config, deps.StoragePsql.Auth, deps.StorageRedis.Auth)
 	return &Services{
 		Auth: authService,
 	}
