@@ -9,6 +9,8 @@ import (
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/service"
+	"github.com/Edbeer/restapi/internal/storage/psql"
+	"github.com/Edbeer/restapi/internal/storage/redis"
 	"github.com/Edbeer/restapi/internal/transport/rest"
 	"github.com/Edbeer/restapi/pkg/logger"
 	"github.com/go-redis/redis/v9"
@@ -35,7 +37,13 @@ func (s *Server) Run() error {
 		certFile := "ssl/server.crt"
 		keyFile := "ssl/server.pem"
 
-		service := service.NewService(service.Deps{})
+		// Services, Repos & API Handlers
+		psql := psql.NewStorage(s.psqlClient)
+		redis := redisrepo.NewStorage(s.redisClient)
+		service := service.NewService(service.Deps{
+			Config:       s.config,
+			PsqlStorage:  psql,
+			RedisStorage: redis})
 		handler := rest.NewHandlers(service)
 		if err := handler.Init(s.echo); err != nil {
 			s.logger.Fatal(err)
@@ -65,7 +73,13 @@ func (s *Server) Run() error {
 	} else {
 		e := echo.New()
 
-		service := service.NewService(service.Deps{})
+		// Services, Repos & API Handlers
+		psql := psql.NewStorage(s.psqlClient)
+		redis := redisrepo.NewStorage(s.redisClient)
+		service := service.NewService(service.Deps{
+			Config:       s.config,
+			PsqlStorage:  psql,
+			RedisStorage: redis})
 		handler := rest.NewHandlers(service)
 		if err := handler.Init(e); err != nil {
 			s.logger.Fatal(err)

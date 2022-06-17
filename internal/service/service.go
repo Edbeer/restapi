@@ -11,13 +11,13 @@ type Services struct {
 }
 
 type Deps struct {
-	StoragePsql  psql.Storage
-	StorageRedis redis.Storage
 	Config       *config.Config
+	PsqlStorage  *psql.Storage
+	RedisStorage *redisrepo.Storage
 }
 
 func NewService(deps Deps) *Services {
-	authService := NewAuthService(deps.Config, deps.StoragePsql.Auth, deps.StorageRedis.Auth)
+	authService := NewAuthService(deps.Config, deps.PsqlStorage.Auth, deps.RedisStorage.Auth)
 	return &Services{
 		Auth: authService,
 	}

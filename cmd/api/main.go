@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/server"
 	"github.com/Edbeer/restapi/pkg/db/postgres"
@@ -18,11 +16,9 @@ func main() {
 	// postgresql
 	psqlClient, err := postgres.NewPsqlClient(cfg)
 	if err != nil {
-		// logger.Fatalf("Postgresql init: %s", err)
-		log.Fatal(err)
+		logger.Fatalf("Postgresql init: %s", err)
 	} else {
-		// logger.Infof("Postgres connected, Status: %#v", psqlClient.Stat())
-		log.Println(psqlClient.Stat())
+		logger.Infof("Postgres connected, Status: %#v", psqlClient.Stat())
 	}
 	defer psqlClient.Close()
 
