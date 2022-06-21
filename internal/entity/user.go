@@ -10,19 +10,19 @@ import (
 
 // User model
 type User struct {
-	ID          uuid.UUID `json:"user_id" db:"user_id"`
-	FirstName   string    `json:"first_name" db:"first_name"`
-	LastName    string    `json:"last_name" db:"last_name"`
-	Email       string    `json:"email" db:"email"`
-	PhoneNumber *string   `json:"phone_number" db:"phone_number"`
-	Role        *string    `json:"role" db:"role"`
-	Address     *string   `json:"address" db:"address"`
-	City        *string   `json:"city" db:"city"`
-	Country     *string   `json:"country" db:"country"`
-	Postcode    *int      `json:"postcode" db:"postcode"`
-	Balance     float64   `json:"balance" db:"postcode"`
+	ID          uuid.UUID `json:"user_id" db:"user_id" validate:"omitempty,uuid"`
+	FirstName   string    `json:"first_name" db:"first_name" validate:"required,lte=30"`
+	LastName    string    `json:"last_name" db:"last_name" validate:"required,lte=30"`
+	Email       string    `json:"email" db:"email" validate:"omitempty,lte=60,email"`
+	PhoneNumber *string   `json:"phone_number" db:"phone_number" validate:"omitempty,lte=20"`
+	Role        *string    `json:"role" db:"role" validate:"omitempty,lte=10"`
+	Address     *string   `json:"address" db:"address" validate:"omitempty,lte=250"`
+	City        *string   `json:"city" db:"city" validate:"omitempty,lte=24"`
+	Country     *string   `json:"country" db:"country" validate:"omitempty,lte=24"`
+	Postcode    *int      `json:"postcode" db:"postcode" validate:"omitempty,lte=10"`
+	Balance     float64   `json:"balance" db:"balance"`
 	Avatar      *string   `json:"avatar" db:"avatar"`
-	Password    string    `json:"-" db:"password"`
+	Password    string    `json:"-" db:"password" validate:"required,gte=6"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
