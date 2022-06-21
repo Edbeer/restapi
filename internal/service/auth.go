@@ -1,12 +1,15 @@
 package service
 
 import (
+	"context"
+
 	"github.com/Edbeer/restapi/config"
+	"github.com/Edbeer/restapi/internal/entity"
 )
 
 // Auth StoragePsql interface
 type AuthPsql interface {
-	Create() error
+	Create(ctx context.Context, user *entity.User) (*entity.User, error)
 }
 
 // Auth StorageRedis interface
@@ -27,6 +30,15 @@ func NewAuthService(config *config.Config, storagePsql AuthPsql, storageRedis Au
 }
 
 // Create new user
-func (a *AuthService) Create() error {
-	return nil
+func (a *AuthService) Create(ctx context.Context, user *entity.User) (*entity.User, error) {
+	if err := user.PrepareCreate(); err != nil {
+		return nil, err
+	}
+
+	createdUser, err := a.storagePsql.Create(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdUser, nil
 }

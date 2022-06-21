@@ -1,4 +1,4 @@
-package httperrors
+package httpe
 
 import (
 	"context"
