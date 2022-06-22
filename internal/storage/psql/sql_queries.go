@@ -23,4 +23,6 @@ const (
 						updated_at = now()
 					WHERE user_id = $12
 					RETURNING *`
+
+	deleteUserQuery = `DELETE FROM users WHERE user_id = $1`
 )

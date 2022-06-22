@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/Edbeer/restapi/pkg/httpe"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -48,3 +50,11 @@ func (a *AuthStorage) Update(ctx context.Context, user *entity.User) (*entity.Us
 	return &u, nil
 }
 
+// Delete user
+func (a *AuthStorage) Delete(ctx context.Context, userID uuid.UUID) error {
+	if _, err := a.psql.Exec(ctx, deleteUserQuery, userID); err != nil {
+		return httpe.NotFound
+	}
+
+	return nil
+}

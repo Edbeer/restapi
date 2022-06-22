@@ -7,12 +7,15 @@ import (
 	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/Edbeer/restapi/pkg/httpe"
 	"github.com/Edbeer/restapi/pkg/utils"
+
+	"github.com/google/uuid"
 )
 
 // Auth StoragePsql interface
 type AuthPsql interface {
 	Create(ctx context.Context, user *entity.User) (*entity.User, error)
 	Update(ctx context.Context, user *entity.User) (*entity.User, error)
+	Delete(ctx context.Context, userID uuid.UUID) error
 }
 
 // Auth StorageRedis interface
@@ -66,4 +69,12 @@ func (a *AuthService) Update(ctx context.Context, user *entity.User) (*entity.Us
 	}
 
 	return updatedUser, nil
+}
+
+// Delete user
+func (a *AuthService) Delete(ctx context.Context, userID uuid.UUID) error {
+	if err := a.storagePsql.Delete(ctx, userID); err != nil {
+		return err
+	}
+	return nil
 }

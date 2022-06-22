@@ -20,8 +20,10 @@ type Auth interface {
 func (h *Handlers) initAuthHandlers(g *echo.Group) {
 	authGroup := g.Group("/auth")
 	{
+		authGroup.POST("/create", h.Create())
+		authGroup.PUT("/:user_id", h.Update())
+		authGroup.DELETE("/:user_id", h.Delete())
 		authGroup.GET("/:user_id", h.GetUserByID())
-		authGroup.POST("", h.Create())
 	}
 }
 
@@ -70,6 +72,25 @@ func (h *Handlers) Update() echo.HandlerFunc {
 		return c.JSON(http.StatusCreated, updatedUser)
 	}
 
+}
+
+// Delete User
+func (h *Handlers) Delete() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		uID, err := uuid.Parse(c.Param("user_id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, httpe.NewBadRequestError(err.Error()))
+		}
+
+		if err := h.service.Auth.Delete(ctx, uID); err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.NoContent(http.StatusOK)
+	}
 }
 
 // Fet user by id
