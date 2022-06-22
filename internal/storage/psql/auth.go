@@ -32,3 +32,19 @@ func (a *AuthStorage) Create(ctx context.Context, user *entity.User) (*entity.Us
 
 	return &u, nil
 }
+
+// Update user
+func (a *AuthStorage) Update(ctx context.Context, user *entity.User) (*entity.User, error) {
+	var u entity.User
+	if _, err := a.psql.Exec(ctx, updateUserQuery, 
+		&user.FirstName, &user.LastName, &user.Email,
+		&user.Role, &user.Avatar, &user.PhoneNumber,
+		&user.Address, &user.City, &user.Country,
+		&user.Postcode, &user.UpdatedAt,
+	); err != nil {
+		return nil, err
+	}
+
+	return &u, nil
+}
+

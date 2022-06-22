@@ -7,12 +7,14 @@ import (
 	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/Edbeer/restapi/pkg/httpe"
 	"github.com/Edbeer/restapi/pkg/utils"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 // Auth Service interface
 type Auth interface {
 	Create(ctx context.Context, user *entity.User) (*entity.User, error)
+	Update(ctx context.Context, user *entity.User) (*entity.User, error)
 }
 
 func (h *Handlers) initAuthHandlers(g *echo.Group) {
@@ -41,6 +43,33 @@ func (h *Handlers) Create() echo.HandlerFunc {
 
 		return c.JSON(http.StatusCreated, createdUser)
 	}
+}
+
+// Update User
+func (h *Handlers) Update() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		var u entity.User
+		uID, err := uuid.Parse(c.Param("user_id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, httpe.NewBadRequestError(err.Error()))
+		}
+		u.ID = uID
+		
+		if err := c.Bind(&u); err != nil {
+			return c.JSON(http.StatusBadRequest, httpe.BadRequest)
+		}
+
+		updatedUser, err := h.service.Auth.Update(ctx, &u)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.JSON(http.StatusCreated, updatedUser)
+	}
+
 }
 
 // Fet user by id

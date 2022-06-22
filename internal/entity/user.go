@@ -3,8 +3,7 @@ package entity
 import (
 	"strings"
 	"time"
-
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,15 +13,15 @@ type User struct {
 	FirstName   string    `json:"first_name" db:"first_name" validate:"required,lte=30"`
 	LastName    string    `json:"last_name" db:"last_name" validate:"required,lte=30"`
 	Email       string    `json:"email" db:"email" validate:"omitempty,lte=60,email"`
-	PhoneNumber *string   `json:"phone_number" db:"phone_number" validate:"omitempty,lte=20"`
+	Password    string    `json:"-" db:"password" validate:"required,gte=6"`
 	Role        *string    `json:"role" db:"role" validate:"omitempty,lte=10"`
+	Avatar      *string   `json:"avatar" db:"avatar"`
+	PhoneNumber *string   `json:"phone_number" db:"phone_number" validate:"omitempty,lte=20"`
 	Address     *string   `json:"address" db:"address" validate:"omitempty,lte=250"`
 	City        *string   `json:"city" db:"city" validate:"omitempty,lte=24"`
 	Country     *string   `json:"country" db:"country" validate:"omitempty,lte=24"`
 	Postcode    *int      `json:"postcode" db:"postcode" validate:"omitempty,lte=10"`
 	Balance     float64   `json:"balance" db:"balance"`
-	Avatar      *string   `json:"avatar" db:"avatar"`
-	Password    string    `json:"-" db:"password" validate:"required,gte=6"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
@@ -68,6 +67,18 @@ func (u *User) PrepareCreate() error {
 		*u.Role = strings.ToLower(strings.TrimSpace(*u.Role))
 	}
 
+	return nil
+}
 
+// Prepare user update 
+func (u *User) PrepareUpdate() error {
+	u.Email = strings.ToLower(strings.TrimSpace(u.Email))
+
+	if u.PhoneNumber != nil {
+		*u.PhoneNumber = strings.TrimSpace(*u.PhoneNumber)
+	}
+	if u.Role != nil {
+		*u.Role = strings.ToLower(strings.TrimSpace(*u.Role))
+	}
 	return nil
 }

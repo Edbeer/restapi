@@ -12,6 +12,7 @@ import (
 // Auth StoragePsql interface
 type AuthPsql interface {
 	Create(ctx context.Context, user *entity.User) (*entity.User, error)
+	Update(ctx context.Context, user *entity.User) (*entity.User, error)
 }
 
 // Auth StorageRedis interface
@@ -47,4 +48,22 @@ func (a *AuthService) Create(ctx context.Context, user *entity.User) (*entity.Us
 	}
 
 	return createdUser, nil
+}
+
+// Update user
+func (a *AuthService) Update(ctx context.Context, user *entity.User) (*entity.User, error) {
+	if err := utils.ValidateStruct(ctx, user); err != nil {
+		return nil, err
+	}
+
+	if err := user.PrepareUpdate(); err != nil {
+		return nil, err
+	}
+
+	updatedUser, err := a.storagePsql.Update(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedUser, nil
 }
