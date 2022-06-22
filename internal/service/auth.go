@@ -14,7 +14,7 @@ import (
 // Auth StoragePsql interface
 type AuthPsql interface {
 	Create(ctx context.Context, user *entity.User) (*entity.User, error)
-	Update(ctx context.Context, user *entity.User) (*entity.User, error)
+	Update(ctx context.Context, user *entity.User) error
 	Delete(ctx context.Context, userID uuid.UUID) error
 }
 
@@ -54,21 +54,21 @@ func (a *AuthService) Create(ctx context.Context, user *entity.User) (*entity.Us
 }
 
 // Update user
-func (a *AuthService) Update(ctx context.Context, user *entity.User) (*entity.User, error) {
+func (a *AuthService) Update(ctx context.Context, user *entity.User) error {
 	if err := utils.ValidateStruct(ctx, user); err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := user.PrepareUpdate(); err != nil {
-		return nil, err
+		return err
 	}
 
-	updatedUser, err := a.storagePsql.Update(ctx, user)
+	err := a.storagePsql.Update(ctx, user)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return updatedUser, nil
+	return nil
 }
 
 // Delete user

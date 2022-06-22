@@ -64,12 +64,12 @@ func (h *Handlers) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, httpe.BadRequest)
 		}
 
-		updatedUser, err := h.service.Auth.Update(ctx, &u)
+		err = h.service.Auth.Update(ctx, &u)
 		if err != nil {
 			return c.JSON(httpe.ErrorResponse(err))
 		}
 
-		return c.JSON(http.StatusCreated, updatedUser)
+		return c.JSON(http.StatusCreated, "user updated")
 	}
 
 }
