@@ -57,3 +57,13 @@ func (a *AuthStorage) Delete(ctx context.Context, userID uuid.UUID) error {
 
 	return nil
 }
+
+// Get user by id
+func (a *AuthStorage) GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error) {
+	var u entity.User
+	if err := a.psql.QueryRow(ctx, getUserByID, userID).Scan(&u); err != nil {
+		return nil, err
+	}
+
+	return &u, nil
+}

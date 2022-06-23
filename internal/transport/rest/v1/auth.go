@@ -15,6 +15,8 @@ import (
 type Auth interface {
 	Create(ctx context.Context, user *entity.User) (*entity.User, error)
 	Update(ctx context.Context, user *entity.User) (*entity.User, error)
+	Delete(ctx context.Context, userID uuid.UUID) error
+	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error)
 }
 
 func (h *Handlers) initAuthHandlers(g *echo.Group) {
@@ -34,6 +36,7 @@ func (h *Handlers) Create() echo.HandlerFunc {
 		defer cancel()
 
 		var user entity.User
+		// Method POST
 		if err := c.Bind(&user); err != nil {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
@@ -60,6 +63,7 @@ func (h *Handlers) Update() echo.HandlerFunc {
 		}
 		u.ID = uID
 		
+		// Method PUT
 		if err := c.Bind(&u); err != nil {
 			return c.JSON(http.StatusBadRequest, httpe.BadRequest)
 		}
@@ -93,9 +97,22 @@ func (h *Handlers) Delete() echo.HandlerFunc {
 	}
 }
 
-// Fet user by id
+// Get user by id
 func (h *Handlers) GetUserByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(200, nil)
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		uID, err := uuid.Parse(c.Param("user_id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, httpe.NewBadRequestError(err.Error()))
+		}
+
+		user, err := h.service.Auth.GetUserByID(ctx, uID)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.JSON(http.StatusOK, user)
 	}
 }

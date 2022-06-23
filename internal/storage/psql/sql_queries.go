@@ -2,12 +2,13 @@ package psql
 
 const (
 	createUserQuery = `INSERT INTO users 
-			(first_name, last_name, 
-			email, password, role, avatar, 
-			phone_number, address, city, country, 
-			postcode, created_at, updated_at)
+				(first_name, last_name, 
+				email, password, role, avatar, 
+				phone_number, address, city, country, 
+				postcode, created_at, updated_at)
 			VALUES ($1, $2, $3, $4, $5, $6, 
-				$7, $8, $9, $10, $11, now(), now()) RETURNING *`
+				$7, $8, $9, $10, $11, now(), now()) 
+			RETURNING *`
 
 	updateUserQuery = `UPDATE users 
 					SET first_name = COALESCE(NULLIF($1, ''), first_name),
@@ -25,4 +26,11 @@ const (
 					RETURNING *`
 
 	deleteUserQuery = `DELETE FROM users WHERE user_id = $1`
+
+	getUserByID = `SELECT user_id, first_name, last_name, 
+					email, password, role, avatar, 
+					phone_number, address, city, country, 
+					postcode, created_at, updated_at
+				FROM users
+				WHERE user_id = $1`
 )
