@@ -33,4 +33,12 @@ const (
 					postcode, created_at, updated_at
 				FROM users
 				WHERE user_id = $1`
-)
+
+	findUsersByName = `SELECT first_name, last_name, 
+						email, password, role, avatar, 
+						phone_number, address, city, country, 
+						postcode, created_at, updated_at
+					FROM users
+					WHERE first_name ILIKE '%' $1 '%' or last_name ILIKE '%' $1 '%'
+					ORDER BY first_name, last_name`
+)	

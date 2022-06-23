@@ -116,3 +116,22 @@ func (h *Handlers) GetUserByID() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, user)
 	}
 }
+
+// Find users by name
+func (a *Handlers) FindUsersByName() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		if c.QueryParam("name") == "" {
+			return c.JSON(http.StatusBadRequest, httpe.NewBadRequestError("name query param is required"))
+		}
+
+		users, err := a.service.Auth.FindUsersByName(ctx, c.QueryParam("name"));
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.JSON(http.StatusOK, users)
+	}
+}

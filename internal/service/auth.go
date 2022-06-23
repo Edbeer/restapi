@@ -17,6 +17,7 @@ type AuthPsql interface {
 	Update(ctx context.Context, user *entity.User) error
 	Delete(ctx context.Context, userID uuid.UUID) error
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error)
+	FindUsersByName(ctx context.Context, name string) ([]*entity.User, error)
 }
 
 // Auth StorageRedis interface
@@ -50,7 +51,7 @@ func (a *AuthService) Create(ctx context.Context, user *entity.User) (*entity.Us
 	if err != nil {
 		return nil, err
 	}
-
+	createdUser.SanitizePassword()
 	return createdUser, nil
 }
 
@@ -68,7 +69,7 @@ func (a *AuthService) Update(ctx context.Context, user *entity.User) error {
 	if err != nil {
 		return err
 	}
-
+	user.SanitizePassword()
 	return nil
 }
 
@@ -82,10 +83,21 @@ func (a *AuthService) Delete(ctx context.Context, userID uuid.UUID) error {
 
 // Get user by id
 func (a *AuthService) GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error) {
-	user, err := a.GetUserByID(ctx, userID)
+	user, err := a.storagePsql.GetUserByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	user.SanitizePassword()
+	return user, nil
+}
+
+// Find users by name
+func (a *AuthService) FindUsersByName(ctx context.Context, name string) ([]*entity.User, error) {
+	users, err := a.storagePsql.FindUsersByName(ctx, name)
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return users, nil
 }
+

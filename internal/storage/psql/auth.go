@@ -2,6 +2,7 @@ package psql
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/Edbeer/restapi/pkg/httpe"
@@ -61,9 +62,34 @@ func (a *AuthStorage) Delete(ctx context.Context, userID uuid.UUID) error {
 // Get user by id
 func (a *AuthStorage) GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error) {
 	var u entity.User
-	if err := a.psql.QueryRow(ctx, getUserByID, userID).Scan(&u); err != nil {
-		return nil, err
+	if err := a.psql.QueryRow(ctx, getUserByID, userID).Scan(&u); err == sql.ErrNoRows {
+		return nil, httpe.NotFound
 	}
 
 	return &u, nil
+}
+
+// Find users by name
+func (a *AuthStorage) FindUsersByName(ctx context.Context, name string) ([]*entity.User, error) {
+	rows, err := a.psql.Query(ctx, findUsersByName, name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	var users []*entity.User
+	for rows.Next() {
+		var user entity.User
+		if err := rows.Scan(&user); err != nil {
+			return nil, err
+		}
+
+		users = append(users, &user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
