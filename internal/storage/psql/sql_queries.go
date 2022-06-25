@@ -51,4 +51,6 @@ const (
 			ORDER BY user_id DESC, COALESCE(NULLIF($2, ''), first_name)
 			LIMIT $3
 			`
+
+	getTotal = `SELECT COUNT(user_id) FROM users`
 )

@@ -1,11 +1,21 @@
 package entity
 
 import (
-	"strings"
-	"time"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
+	"time"
 )
+
+// Users List
+type UsersList struct {
+	TotalCount int     `json:"total_count"`
+	TotalPages int     `json:"total_pages"`
+	Page       int     `json:"page"`
+	Size       int     `json:"size"`
+	HasMore    bool    `json:"has_more"`
+	Users      []*User `json:"users"`
+}
 
 // User model
 type User struct {
@@ -14,7 +24,7 @@ type User struct {
 	LastName    string    `json:"last_name" db:"last_name" validate:"required,lte=30"`
 	Email       string    `json:"email" db:"email" validate:"omitempty,lte=60,email"`
 	Password    string    `json:"-" db:"password" validate:"required,gte=6"`
-	Role        *string    `json:"role" db:"role" validate:"omitempty,lte=10"`
+	Role        *string   `json:"role" db:"role" validate:"omitempty,lte=10"`
 	Avatar      *string   `json:"avatar" db:"avatar"`
 	PhoneNumber *string   `json:"phone_number" db:"phone_number" validate:"omitempty,lte=20"`
 	Address     *string   `json:"address" db:"address" validate:"omitempty,lte=250"`
@@ -30,7 +40,7 @@ type User struct {
 func (u *User) HashPassword() error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err 
+		return err
 	}
 
 	u.Password = string(hashedPassword)
@@ -54,7 +64,7 @@ func (u *User) SanitizePassword() {
 func (u *User) PrepareCreate() error {
 	u.Email = strings.ToLower(strings.TrimSpace(u.Email))
 	u.Password = strings.TrimSpace(u.Password)
-	
+
 	if err := u.HashPassword(); err != nil {
 		return err
 	}
@@ -62,7 +72,7 @@ func (u *User) PrepareCreate() error {
 	if u.PhoneNumber != nil {
 		*u.PhoneNumber = strings.TrimSpace(*u.PhoneNumber)
 	}
-	
+
 	if u.Role != nil {
 		*u.Role = strings.ToLower(strings.TrimSpace(*u.Role))
 	}
@@ -70,7 +80,7 @@ func (u *User) PrepareCreate() error {
 	return nil
 }
 
-// Prepare user update 
+// Prepare user update
 func (u *User) PrepareUpdate() error {
 	u.Email = strings.ToLower(strings.TrimSpace(u.Email))
 

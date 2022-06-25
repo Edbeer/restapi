@@ -96,8 +96,22 @@ func (a *AuthStorage) FindUsersByName(ctx context.Context, name string) ([]*enti
 }
 
 // Get users
-func (a *AuthStorage) GetUsers(ctx context.Context, pg *utils.PaginationQuery) ([]*entity.User, error) {
-	rows, err := a.psql.Query(ctx, getUsers, pg.GetDifference(), pg.GetOrderBy(), pg.GetLimit())
+func (a *AuthStorage) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*entity.UsersList, error) {
+	var totalCount int
+
+	// Start a transaction to ensure user count
+	tx, err := a.psql.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	err = tx.QueryRow(ctx, getTotal).Scan(&totalCount)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := tx.Query(ctx, getUsers, pq.GetDifference(), pq.GetOrderBy(), pq.GetLimit())
 	if err != nil {
 		return nil, err
 	}
@@ -117,5 +131,12 @@ func (a *AuthStorage) GetUsers(ctx context.Context, pg *utils.PaginationQuery) (
 		return nil, err
 	}
 
-	return users, nil
+	return &entity.UsersList{
+		TotalCount: totalCount,
+		TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+		Page: pq.GetPage(),
+		Size: pq.GetSize(),
+		HasMore: utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+		Users: users,
+	}, nil
 }

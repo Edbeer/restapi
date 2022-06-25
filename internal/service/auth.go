@@ -18,7 +18,7 @@ type AuthPsql interface {
 	Delete(ctx context.Context, userID uuid.UUID) error
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error)
 	FindUsersByName(ctx context.Context, name string) ([]*entity.User, error)
-	GetUsers(ctx context.Context, pg *utils.PaginationQuery) ([]*entity.User, error)
+	GetUsers(ctx context.Context, pg *utils.PaginationQuery) (*entity.UsersList, error)
 }
 
 // Auth StorageRedis interface
@@ -103,7 +103,7 @@ func (a *AuthService) FindUsersByName(ctx context.Context, name string) ([]*enti
 }
 
 // Get users
-func (a *AuthService) GetUsers(ctx context.Context, pg *utils.PaginationQuery) ([]*entity.User, error) {
+func (a *AuthService) GetUsers(ctx context.Context, pg *utils.PaginationQuery) (*entity.UsersList, error) {
 	users, err := a.storagePsql.GetUsers(ctx, pg)
 	if err != nil {
 		return nil, err

@@ -38,6 +38,11 @@ func GetTotalPages(totalCount int, pageSize int) int {
 	return int(math.Ceil(d))
 }
 
+// Get has more
+func GetHasMore(currentPage int, totalCount int, pageSize int) bool {
+	return currentPage < totalCount/pageSize
+}
+
 // Set page size
 func (q *PaginationQuery) SetSize(sizeQuery string) error {
 	if sizeQuery == "" {
@@ -108,7 +113,7 @@ func (q *PaginationQuery) GetDifference() int {
 	return q.Difference
 }
 
-// Get OrderBy
+// Get order by
 func (q *PaginationQuery) GetOrderBy() string {
 	return q.OrderBy
 }
