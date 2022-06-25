@@ -135,3 +135,22 @@ func (a *Handlers) FindUsersByName() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, users)
 	}
 }
+
+func (h *Handlers) GetUsers() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		pq, err := utils.GetPaginationFromCtx(c)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		users, err := h.service.Auth.GetUsers(ctx, pq)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.JSON(http.StatusOK, users)
+	}
+}
