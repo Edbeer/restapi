@@ -17,8 +17,8 @@ type AuthPsql interface {
 	Update(ctx context.Context, user *entity.User) error
 	Delete(ctx context.Context, userID uuid.UUID) error
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error)
-	FindUsersByName(ctx context.Context, name string) ([]*entity.User, error)
-	GetUsers(ctx context.Context, pg *utils.PaginationQuery) (*entity.UsersList, error)
+	FindUsersByName(ctx context.Context, name string, pq *utils.PaginationQuery) (*entity.UsersList, error)
+	GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*entity.UsersList, error)
 }
 
 // Auth StorageRedis interface
@@ -93,8 +93,9 @@ func (a *AuthService) GetUserByID(ctx context.Context, userID uuid.UUID) (*entit
 }
 
 // Find users by name
-func (a *AuthService) FindUsersByName(ctx context.Context, name string) ([]*entity.User, error) {
-	users, err := a.storagePsql.FindUsersByName(ctx, name)
+func (a *AuthService) FindUsersByName(ctx context.Context, name string, 
+	pq *utils.PaginationQuery) (*entity.UsersList, error) {
+	users, err := a.storagePsql.FindUsersByName(ctx, name, pq)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +104,8 @@ func (a *AuthService) FindUsersByName(ctx context.Context, name string) ([]*enti
 }
 
 // Get users
-func (a *AuthService) GetUsers(ctx context.Context, pg *utils.PaginationQuery) (*entity.UsersList, error) {
-	users, err := a.storagePsql.GetUsers(ctx, pg)
+func (a *AuthService) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*entity.UsersList, error) {
+	users, err := a.storagePsql.GetUsers(ctx, pq)
 	if err != nil {
 		return nil, err
 	}

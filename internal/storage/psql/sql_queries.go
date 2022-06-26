@@ -53,4 +53,9 @@ const (
 			`
 
 	getTotal = `SELECT COUNT(user_id) FROM users`
+
+	getTotalCount = `SELECT COUNT(user_id) 
+					FROM users 
+					WHERE first_name ILIKE '%' || $1 || '%' 
+						or last_name ILIKE '%' || $1 || '%'`
 )

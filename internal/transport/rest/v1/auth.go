@@ -14,9 +14,11 @@ import (
 // Auth Service interface
 type Auth interface {
 	Create(ctx context.Context, user *entity.User) (*entity.User, error)
-	Update(ctx context.Context, user *entity.User) (*entity.User, error)
+	Update(ctx context.Context, user *entity.User) error
 	Delete(ctx context.Context, userID uuid.UUID) error
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error)
+	FindUsersByName(ctx context.Context, name string, pq *utils.PaginationQuery) (*entity.UsersList, error)
+	GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*entity.UsersList, error)
 }
 
 func (h *Handlers) initAuthHandlers(g *echo.Group) {
@@ -127,7 +129,12 @@ func (a *Handlers) FindUsersByName() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, httpe.NewBadRequestError("name query param is required"))
 		}
 
-		users, err := a.service.Auth.FindUsersByName(ctx, c.QueryParam("name"));
+		pq, err := utils.GetPaginationFromCtx(c)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		users, err := a.service.Auth.FindUsersByName(ctx, c.QueryParam("name"), pq);
 		if err != nil {
 			return c.JSON(httpe.ErrorResponse(err))
 		}

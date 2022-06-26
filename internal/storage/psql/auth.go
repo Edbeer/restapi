@@ -71,8 +71,24 @@ func (a *AuthStorage) GetUserByID(ctx context.Context, userID uuid.UUID) (*entit
 }
 
 // Find users by name
-func (a *AuthStorage) FindUsersByName(ctx context.Context, name string) ([]*entity.User, error) {
-	rows, err := a.psql.Query(ctx, findUsersByName, name)
+func (a *AuthStorage) FindUsersByName(ctx context.Context,
+	name string, pq *utils.PaginationQuery) (*entity.UsersList, error) {
+
+	var totalCount int
+
+	// Start a transaction to ensure user count
+	tx, err := a.psql.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	err = tx.QueryRow(ctx, getTotalCount).Scan(&totalCount)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := tx.Query(ctx, findUsersByName, name)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +108,14 @@ func (a *AuthStorage) FindUsersByName(ctx context.Context, name string) ([]*enti
 		return nil, err
 	}
 
-	return users, nil
+	return &entity.UsersList{
+		TotalCount: totalCount,
+		TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+		Page:       pq.GetPage(),
+		Size:       pq.GetSize(),
+		HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+		Users:      users,
+	}, nil
 }
 
 // Get users
@@ -134,9 +157,9 @@ func (a *AuthStorage) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (
 	return &entity.UsersList{
 		TotalCount: totalCount,
 		TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
-		Page: pq.GetPage(),
-		Size: pq.GetSize(),
-		HasMore: utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
-		Users: users,
+		Page:       pq.GetPage(),
+		Size:       pq.GetSize(),
+		HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+		Users:      users,
 	}, nil
 }
