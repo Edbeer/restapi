@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/Edbeer/restapi/internal/middleware"
 	"github.com/Edbeer/restapi/pkg/httpe"
 	"github.com/Edbeer/restapi/pkg/utils"
 	"github.com/google/uuid"
@@ -25,9 +26,12 @@ func (h *Handlers) initAuthHandlers(g *echo.Group) {
 	authGroup := g.Group("/auth")
 	{
 		authGroup.POST("/create", h.Create())
+		authGroup.GET("/:user_id", h.GetUserByID())
+		authGroup.GET("/find", h.FindUsersByName())
+		authGroup.GET("/all", h.GetUsers())
+		authGroup.Use(middleware.AuthJWTMiddleware(h.service.Auth, h.config))
 		authGroup.PUT("/:user_id", h.Update())
 		authGroup.DELETE("/:user_id", h.Delete())
-		authGroup.GET("/:user_id", h.GetUserByID())
 	}
 }
 

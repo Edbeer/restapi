@@ -1,14 +1,17 @@
 package v1
 
 import (
+	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/service"
 	"github.com/Edbeer/restapi/pkg/logger"
+
 	"github.com/labstack/echo/v4"
 )
 
 type Handlers struct {
-	logger *logger.Logger
 	service *service.Services
+	config *config.Config
+	logger logger.Logger
 }
 
 func (h *Handlers) InitHandlers(e *echo.Group) {
@@ -18,7 +21,7 @@ func (h *Handlers) InitHandlers(e *echo.Group) {
 	}
 }
 
-func NewHandlers(logger *logger.Logger, service *service.Services) *Handlers {
-	return &Handlers{logger: logger, service: service}
+func NewHandlers(service *service.Services, config *config.Config, logger logger.Logger) *Handlers {
+	return &Handlers{service: service, config: config, logger: logger}
 }
 

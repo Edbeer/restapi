@@ -38,13 +38,15 @@ func (s *Server) Run() error {
 		keyFile := "ssl/server.pem"
 
 		// Services, Repos & API Handlers
+		cfg := config.GetConfig()
+
 		psql := psql.NewStorage(s.psqlClient)
 		redis := redisrepo.NewStorage(s.redisClient)
 		service := service.NewService(service.Deps{
 			Config:       s.config,
 			PsqlStorage:  psql,
 			RedisStorage: redis})
-		handler := rest.NewHandlers(service)
+		handler := rest.NewHandlers(service, cfg, s.logger)
 		if err := handler.Init(s.echo); err != nil {
 			s.logger.Fatal(err)
 		}
@@ -74,13 +76,15 @@ func (s *Server) Run() error {
 		e := echo.New()
 
 		// Services, Repos & API Handlers
+		cfg := config.GetConfig()
+
 		psql := psql.NewStorage(s.psqlClient)
 		redis := redisrepo.NewStorage(s.redisClient)
 		service := service.NewService(service.Deps{
 			Config:       s.config,
 			PsqlStorage:  psql,
 			RedisStorage: redis})
-		handler := rest.NewHandlers(service)
+		handler := rest.NewHandlers(service, cfg, s.logger)
 		if err := handler.Init(e); err != nil {
 			s.logger.Fatal(err)
 		}

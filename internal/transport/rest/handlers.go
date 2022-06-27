@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/service"
 	"github.com/Edbeer/restapi/internal/transport/rest/v1"
 	"github.com/Edbeer/restapi/pkg/logger"
@@ -9,12 +10,13 @@ import (
 )
 
 type Handlers struct {
-	logger *logger.Logger
 	service *service.Services
+	config  *config.Config
+	logger logger.Logger
 }
 
-func NewHandlers(service *service.Services) *Handlers {
-	return &Handlers{service: service}
+func NewHandlers(service *service.Services, config *config.Config, logger logger.Logger) *Handlers {
+	return &Handlers{service: service, config: config, logger: logger}
 }
 
 func (h *Handlers) Init(e *echo.Echo) error {
@@ -44,7 +46,7 @@ func (h *Handlers) Init(e *echo.Echo) error {
 }
 
 func (h *Handlers) initApi(e *echo.Echo) {
-	handlerV1 := v1.NewHandlers(h.logger, h.service)
+	handlerV1 := v1.NewHandlers(h.service, h.config, h.logger)
 	api := e.Group("/api")
 	{
 		handlerV1.InitHandlers(api)
