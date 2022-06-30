@@ -124,7 +124,7 @@ func (h *Handlers) GetUserByID() echo.HandlerFunc {
 }
 
 // Find users by name
-func (a *Handlers) FindUsersByName() echo.HandlerFunc {
+func (h *Handlers) FindUsersByName() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
@@ -138,7 +138,7 @@ func (a *Handlers) FindUsersByName() echo.HandlerFunc {
 			return c.JSON(httpe.ErrorResponse(err))
 		}
 
-		users, err := a.service.Auth.FindUsersByName(ctx, c.QueryParam("name"), pq);
+		users, err := h.service.Auth.FindUsersByName(ctx, c.QueryParam("name"), pq);
 		if err != nil {
 			return c.JSON(httpe.ErrorResponse(err))
 		}
