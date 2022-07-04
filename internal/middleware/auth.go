@@ -13,7 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func AuthJWTMiddleware(authService service.AuthPsql, config *config.Config) echo.MiddlewareFunc {
+func AuthJWTMiddleware(authService service.AuthService, config *config.Config) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			bearerHeader := c.Request().Header.Get("Authorization")
@@ -44,7 +44,7 @@ func AuthJWTMiddleware(authService service.AuthPsql, config *config.Config) echo
 	}
 }
 
-func validateJWTToken(tokenString string, authService service.AuthPsql, c echo.Context, config *config.Config) error {
+func validateJWTToken(tokenString string, authService service.AuthService, c echo.Context, config *config.Config) error {
 	if tokenString == "" {
 		return httpe.InvalidJWTToken
 	}

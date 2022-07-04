@@ -13,6 +13,7 @@ type Config struct {
 	Logger   Logger         `yaml:"logger"`
 	Postgres PostgresConfig `yaml:"postgres"`
 	Redis    RedisConfig    `yaml:"redis"`
+	Cookie   Cookie
 }
 
 // Server config struct
@@ -56,6 +57,13 @@ type Logger struct {
 	DisableStacktrace bool   `yaml:"DisableStacktrace"`
 	Encoding          string `yaml:"Encoding"`
 	Level             string `yaml:"Level"`
+}
+
+type Cookie struct {
+	Name     string
+	MaxAge   int
+	Secure   bool
+	HTTPOnly bool
 }
 
 var (

@@ -14,7 +14,7 @@ import (
 
 // Auth Service interface
 type Auth interface {
-	Create(ctx context.Context, user *entity.User) (*entity.User, error)
+	Register(ctx context.Context, user *entity.User) (*entity.UserWithToken, error)
 	Update(ctx context.Context, user *entity.User) error
 	Delete(ctx context.Context, userID uuid.UUID) error
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error)
@@ -25,18 +25,18 @@ type Auth interface {
 func (h *Handlers) initAuthHandlers(g *echo.Group) {
 	authGroup := g.Group("/auth")
 	{
-		authGroup.POST("/create", h.Create())
+		authGroup.POST("/register", h.Register())
 		authGroup.GET("/:user_id", h.GetUserByID())
 		authGroup.GET("/find", h.FindUsersByName())
 		authGroup.GET("/all", h.GetUsers())
-		authGroup.Use(middleware.AuthJWTMiddleware(h.service.Auth, h.config))
+		authGroup.Use(middleware.AuthJWTMiddleware(*h.service.Auth, h.config))
 		authGroup.PUT("/:user_id", h.Update())
 		authGroup.DELETE("/:user_id", h.Delete())
 	}
 }
 
-// Create new user
-func (h *Handlers) Create() echo.HandlerFunc {
+// Register new user
+func (h *Handlers) Register() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
@@ -47,10 +47,12 @@ func (h *Handlers) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		createdUser, err := h.service.Auth.Create(ctx, &user)
+		createdUser, err := h.service.Auth.Register(ctx, &user)
 		if err != nil {
 			return c.JSON(httpe.ParseErrors(err).Status(), httpe.ParseErrors(err))
 		}
+
+		c.SetCookie(utils.ConfigureJWTCookie(h.config, createdUser.Token))
 
 		return c.JSON(http.StatusCreated, createdUser)
 	}
@@ -68,7 +70,7 @@ func (h *Handlers) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, httpe.NewBadRequestError(err.Error()))
 		}
 		u.ID = uID
-		
+
 		// Method PUT
 		if err := c.Bind(&u); err != nil {
 			return c.JSON(http.StatusBadRequest, httpe.BadRequest)
@@ -138,7 +140,7 @@ func (h *Handlers) FindUsersByName() echo.HandlerFunc {
 			return c.JSON(httpe.ErrorResponse(err))
 		}
 
-		users, err := h.service.Auth.FindUsersByName(ctx, c.QueryParam("name"), pq);
+		users, err := h.service.Auth.FindUsersByName(ctx, c.QueryParam("name"), pq)
 		if err != nil {
 			return c.JSON(httpe.ErrorResponse(err))
 		}

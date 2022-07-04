@@ -13,7 +13,7 @@ import (
 
 // Auth StoragePsql interface
 type AuthPsql interface {
-	Create(ctx context.Context, user *entity.User) (*entity.User, error)
+	Register(ctx context.Context, user *entity.User) (*entity.User, error)
 	Update(ctx context.Context, user *entity.User) error
 	Delete(ctx context.Context, userID uuid.UUID) error
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error)
@@ -28,18 +28,18 @@ type AuthRedis interface {
 
 // Auth service
 type AuthService struct {
-	config  *config.Config
-	storagePsql AuthPsql
+	config       *config.Config
+	storagePsql  AuthPsql
 	storageRedis AuthRedis
 }
 
 // Auth service constructor
 func NewAuthService(config *config.Config, storagePsql AuthPsql, storageRedis AuthRedis) *AuthService {
-	return &AuthService{config: config,storagePsql: storagePsql, storageRedis: storageRedis}
+	return &AuthService{config: config, storagePsql: storagePsql, storageRedis: storageRedis}
 }
 
-// Create new user
-func (a *AuthService) Create(ctx context.Context, user *entity.User) (*entity.User, error) {
+// Register new user
+func (a *AuthService) Register(ctx context.Context, user *entity.User) (*entity.UserWithToken, error) {
 	if err := user.PrepareCreate(); err != nil {
 		return nil, httpe.NewBadRequestError(err.Error())
 	}
@@ -48,12 +48,21 @@ func (a *AuthService) Create(ctx context.Context, user *entity.User) (*entity.Us
 		return nil, err
 	}
 
-	createdUser, err := a.storagePsql.Create(ctx, user)
+	createdUser, err := a.storagePsql.Register(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 	createdUser.SanitizePassword()
-	return createdUser, nil
+
+	token, err := utils.GenerateJWTToken(createdUser, a.config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entity.UserWithToken{
+		User:  createdUser,
+		Token: token,
+	}, nil
 }
 
 // Update user
@@ -93,7 +102,7 @@ func (a *AuthService) GetUserByID(ctx context.Context, userID uuid.UUID) (*entit
 }
 
 // Find users by name
-func (a *AuthService) FindUsersByName(ctx context.Context, name string, 
+func (a *AuthService) FindUsersByName(ctx context.Context, name string,
 	pq *utils.PaginationQuery) (*entity.UsersList, error) {
 	users, err := a.storagePsql.FindUsersByName(ctx, name, pq)
 	if err != nil {
@@ -112,4 +121,3 @@ func (a *AuthService) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (
 
 	return users, nil
 }
-

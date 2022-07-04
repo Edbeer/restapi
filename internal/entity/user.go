@@ -36,6 +36,12 @@ type User struct {
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
 
+// Find user query
+type UserWithToken struct {
+	User  *User  `json:"user"`
+	Token string `json:"token"`
+}
+
 // Hash user password with bcrypt
 func (u *User) HashPassword() error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)

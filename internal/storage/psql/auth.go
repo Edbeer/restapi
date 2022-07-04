@@ -21,8 +21,8 @@ func NewAuthStorage(psql *pgxpool.Pool) *AuthStorage {
 	return &AuthStorage{psql: psql}
 }
 
-// Create user
-func (a *AuthStorage) Create(ctx context.Context, user *entity.User) (*entity.User, error) {
+// Register user
+func (a *AuthStorage) Register(ctx context.Context, user *entity.User) (*entity.User, error) {
 	var u entity.User
 	if err := a.psql.QueryRow(ctx, createUserQuery,
 		&user.FirstName, &user.LastName, &user.Email,
