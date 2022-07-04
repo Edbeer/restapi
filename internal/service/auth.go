@@ -19,6 +19,7 @@ type AuthPsql interface {
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error)
 	FindUsersByName(ctx context.Context, name string, pq *utils.PaginationQuery) (*entity.UsersList, error)
 	GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*entity.UsersList, error)
+	FindUserByEmail(ctx context.Context, user *entity.User) (*entity.User, error)
 }
 
 // Auth StorageRedis interface
@@ -120,4 +121,28 @@ func (a *AuthService) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (
 	}
 
 	return users, nil
+}
+
+// Login user, returns user model with jwt token
+func (a *AuthService) Login(ctx context.Context, user *entity.User) (*entity.UserWithToken, error) {
+	foundUser, err := a.storagePsql.FindUserByEmail(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := foundUser.ComparePassword(user.Password); err != nil {
+		return nil, err
+	}
+
+	foundUser.SanitizePassword()
+
+	token, err := utils.GenerateJWTToken(foundUser, a.config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entity.UserWithToken{
+		User: foundUser,
+		Token: token,
+	}, nil
 }

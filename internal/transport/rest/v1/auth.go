@@ -20,12 +20,14 @@ type Auth interface {
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error)
 	FindUsersByName(ctx context.Context, name string, pq *utils.PaginationQuery) (*entity.UsersList, error)
 	GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*entity.UsersList, error)
+	Login(ctx context.Context, user *entity.User) (*entity.UserWithToken, error)
 }
 
 func (h *Handlers) initAuthHandlers(g *echo.Group) {
 	authGroup := g.Group("/auth")
 	{
 		authGroup.POST("/register", h.Register())
+		authGroup.POST("/login", h.Login())
 		authGroup.GET("/:user_id", h.GetUserByID())
 		authGroup.GET("/find", h.FindUsersByName())
 		authGroup.GET("/all", h.GetUsers())
@@ -165,5 +167,30 @@ func (h *Handlers) GetUsers() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, users)
+	}
+}
+
+// Login
+func (h *Handlers) Login() echo.HandlerFunc {
+	type Login struct {
+		Email    string `json:"email" db:"email" validate:"omitempty,lte=60,email"`
+		Password string `json:"password,omitempty" db:"password" validate:"required,gte=6"`
+	}
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		login := &Login{}
+		userWithToken, err := h.service.Auth.Login(ctx, &entity.User{
+			Email:    login.Email,
+			Password: login.Password,
+		})
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		c.SetCookie(utils.ConfigureJWTCookie(h.config, userWithToken.Token))
+
+		return c.JSON(http.StatusOK, userWithToken)
 	}
 }

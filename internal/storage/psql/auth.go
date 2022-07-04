@@ -163,3 +163,12 @@ func (a *AuthStorage) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (
 		Users:      users,
 	}, nil
 }
+
+// Find user by email
+func (a *AuthStorage) FindUserByEmail(ctx context.Context, user *entity.User) (*entity.User, error) {
+	foundUser := &entity.User{}
+	if err := a.psql.QueryRow(ctx, findUserByEmail, user.Email).Scan(foundUser); err != nil {
+		return nil, err
+	}
+	return foundUser, nil
+}
