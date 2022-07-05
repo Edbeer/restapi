@@ -28,6 +28,7 @@ func (h *Handlers) initAuthHandlers(g *echo.Group) {
 	{
 		authGroup.POST("/register", h.Register())
 		authGroup.POST("/login", h.Login())
+		authGroup.POST("/logout", h.Logout())
 		authGroup.GET("/:user_id", h.GetUserByID())
 		authGroup.GET("/find", h.FindUsersByName())
 		authGroup.GET("/all", h.GetUsers())
@@ -193,6 +194,21 @@ func (h *Handlers) Login() echo.HandlerFunc {
 		c.SetCookie(utils.ConfigureJWTCookie(h.config, userWithToken.Token))
 
 		return c.JSON(http.StatusOK, userWithToken)
+	}
+}
+
+// Logout 
+func (h *Handlers) Logout() echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		c.SetCookie(&http.Cookie{
+			Name: h.config.Cookie.Name,
+			Value: "",
+			Path: "/",
+			MaxAge: -1,
+		})
+
+		return c.NoContent(http.StatusOK)
 	}
 }
 
