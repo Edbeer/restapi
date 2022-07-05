@@ -81,6 +81,8 @@ func validateJWTToken(tokenString string, authService service.AuthService, c ech
 			return err
 		}
 
+		c.Set("user", u)
+
 		ctx := context.WithValue(c.Request().Context(), "user", u)
 		c.Request().WithContext(ctx)
 		c.SetRequest(c.Request().WithContext(ctx))

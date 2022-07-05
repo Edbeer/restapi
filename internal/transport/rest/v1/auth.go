@@ -34,6 +34,7 @@ func (h *Handlers) initAuthHandlers(g *echo.Group) {
 		authGroup.Use(middleware.AuthJWTMiddleware(*h.service.Auth, h.config))
 		authGroup.PUT("/:user_id", h.Update())
 		authGroup.DELETE("/:user_id", h.Delete())
+		authGroup.GET("/me", h.GetMe())
 	}
 }
 
@@ -192,5 +193,17 @@ func (h *Handlers) Login() echo.HandlerFunc {
 		c.SetCookie(utils.ConfigureJWTCookie(h.config, userWithToken.Token))
 
 		return c.JSON(http.StatusOK, userWithToken)
+	}
+}
+
+// Load current user from ctx with auth middleware
+func (h *Handlers) GetMe() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user, ok := c.Get("user").(*entity.User)
+		if !ok {
+			h.logger.Info("no user ctx")
+		}
+
+		return c.JSON(http.StatusOK, user)
 	}
 }
