@@ -33,7 +33,7 @@ func (h *Handlers) initAuthHandlers(g *echo.Group) {
 		authGroup.GET("/all", h.GetUsers())
 		authGroup.Use(middleware.AuthJWTMiddleware(*h.service.Auth, h.config))
 		authGroup.PUT("/:user_id", h.Update())
-		authGroup.DELETE("/:user_id", h.Delete())
+		authGroup.DELETE("/:user_id", h.Delete(), middleware.RoleBasedAuthMiddleware([]string{"admin"}))
 		authGroup.GET("/me", h.GetMe())
 	}
 }

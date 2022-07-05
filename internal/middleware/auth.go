@@ -3,9 +3,11 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/Edbeer/restapi/config"
+	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/Edbeer/restapi/internal/service"
 	"github.com/Edbeer/restapi/pkg/httpe"
 	"github.com/golang-jwt/jwt"
@@ -36,13 +38,45 @@ func AuthJWTMiddleware(authService service.AuthService, config *config.Config) e
 				}
 
 				if err := validateJWTToken(cookie.Value, authService, c, config); err != nil {
-					return c.JSON(httpe.ErrorResponse(err))
+					return c.JSON(http.StatusUnauthorized, httpe.NewUnauthorizedError(httpe.Unauthorized))
 				}
 				return next(c)
 			}
 		}
 	}
 }
+
+// Admin role
+func AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user, ok := c.Get("user").(*entity.User)
+		if !ok || *user.Role != "admin" {
+			return c.JSON(http.StatusForbidden, httpe.NewUnauthorizedError(httpe.PermissionDenied))
+		}
+		return next(c)
+	}
+}
+
+// Role based auth middleware, using ctx user
+func RoleBasedAuthMiddleware(roles []string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			user, ok := c.Get("user").(*entity.User)
+			if !ok {
+				return c.JSON(http.StatusUnauthorized, httpe.NewUnauthorizedError(httpe.Unauthorized))
+			}
+
+			for _, role := range roles {
+				if role == *user.Role {
+					return next(c)
+				}
+			}
+
+			return c.JSON(http.StatusForbidden, httpe.NewForbiddenError(httpe.PermissionDenied))
+		}
+	}
+}
+
 
 func validateJWTToken(tokenString string, authService service.AuthService, c echo.Context, config *config.Config) error {
 	if tokenString == "" {
