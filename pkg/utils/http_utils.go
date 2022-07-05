@@ -26,7 +26,7 @@ func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
 		Name:       cfg.Cookie.Name,
 		Value:      jwtToken,
 		Path:       "/",
-		Domain:     "/",
+		// Domain:     "/",
 		RawExpires: "",
 		MaxAge:     cfg.Cookie.MaxAge,
 		Secure:     cfg.Cookie.Secure,

@@ -57,6 +57,27 @@ func AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func OwnerOrAdminMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			user, ok := c.Get("user").(*entity.User)
+			if !ok {
+				return c.JSON(http.StatusUnauthorized, httpe.NewUnauthorizedError(httpe.Unauthorized))
+			}
+
+			if *user.Role == "admin" {
+				return next(c)
+			}
+
+			if user.ID.String() != c.Param("user_id") {
+				return c.JSON(http.StatusForbidden, httpe.NewForbiddenError(httpe.Forbidden))
+			}
+
+			return next(c)
+		}
+	}
+}
+
 // Role based auth middleware, using ctx user
 func RoleBasedAuthMiddleware(roles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
