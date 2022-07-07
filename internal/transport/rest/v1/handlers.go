@@ -18,6 +18,7 @@ func (h *Handlers) InitHandlers(e *echo.Group) {
 	v1 := e.Group("/v1")
 	{
 		h.initAuthHandlers(v1)
+		h.initNewsHandlers(v1)
 	}
 }
 

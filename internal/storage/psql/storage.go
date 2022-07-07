@@ -7,10 +7,12 @@ import (
 
 type Storage struct {
 	Auth *AuthStorage
+	News *NewsStorage
 }
 
 func NewStorage(psql *pgxpool.Pool) *Storage {
 	return &Storage{
 		Auth: NewAuthStorage(psql),
+		News: NewNewsStorage(psql),
 	}
 }

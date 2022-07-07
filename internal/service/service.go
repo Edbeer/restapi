@@ -8,6 +8,7 @@ import (
 
 type Services struct {
 	Auth *AuthService
+	News *NewsService
 }
 
 type Deps struct {
@@ -18,7 +19,9 @@ type Deps struct {
 
 func NewService(deps Deps) *Services {
 	authService := NewAuthService(deps.Config, deps.PsqlStorage.Auth, deps.RedisStorage.Auth)
+	newsService := NewNewsService(deps.Config, deps.PsqlStorage.News)
 	return &Services{
 		Auth: authService,
+		News: newsService,
 	}
 }
