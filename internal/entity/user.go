@@ -19,21 +19,21 @@ type UsersList struct {
 
 // User model
 type User struct {
-	ID          uuid.UUID `json:"user_id" db:"user_id" validate:"omitempty,uuid"`
-	FirstName   string    `json:"first_name" db:"first_name" validate:"required,lte=30"`
-	LastName    string    `json:"last_name" db:"last_name" validate:"required,lte=30"`
-	Email       string    `json:"email" db:"email" validate:"omitempty,lte=60,email"`
-	Password    string    `json:"-" db:"password" validate:"required,gte=6"`
-	Role        *string   `json:"role" db:"role" validate:"omitempty,lte=10"`
-	Avatar      *string   `json:"avatar" db:"avatar"`
-	PhoneNumber *string   `json:"phone_number" db:"phone_number" validate:"omitempty,lte=20"`
-	Address     *string   `json:"address" db:"address" validate:"omitempty,lte=250"`
-	City        *string   `json:"city" db:"city" validate:"omitempty,lte=24"`
-	Country     *string   `json:"country" db:"country" validate:"omitempty,lte=24"`
-	Postcode    *int      `json:"postcode" db:"postcode" validate:"omitempty,lte=10"`
-	Balance     float64   `json:"balance" db:"balance"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+	ID          uuid.UUID `json:"user_id" db:"user_id" redis:"user_id" validate:"omitempty,uuid"`
+	FirstName   string    `json:"first_name" db:"first_name" redis:"first_name" validate:"required,lte=30"`
+	LastName    string    `json:"last_name" db:"last_name" redis:"last_name" validate:"required,lte=30"`
+	Email       string    `json:"email" db:"email" redis:"email" validate:"omitempty,lte=60,email"`
+	Password    string    `json:"-" db:"password" redis:"password" validate:"required,gte=6"`
+	Role        *string   `json:"role" db:"role" redis:"role" validate:"omitempty,lte=10"`
+	Avatar      *string   `json:"avatar" db:"avatar" redis:"avatar"`
+	PhoneNumber *string   `json:"phone_number" db:"phone_number" redis:"phone_number" validate:"omitempty,lte=20"`
+	Address     *string   `json:"address" db:"address" redis:"address" validate:"omitempty,lte=250"`
+	City        *string   `json:"city" db:"city" redis:"city" validate:"omitempty,lte=24"`
+	Country     *string   `json:"country" db:"country" redis:"country" validate:"omitempty,lte=24"`
+	Postcode    *int      `json:"postcode" db:"postcode" redis:"postcode" validate:"omitempty,lte=10"`
+	Balance     float64   `json:"balance" db:"balance" redis:"balance"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at" redis:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at" redis:"updated_at"`
 }
 
 // Find user query
