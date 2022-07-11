@@ -13,4 +13,6 @@ const (
 					updated_at = now()
 				WHERE news_id = $5
 				RETURNING *`
+
+	deleteNews = `DELETE FROM news WHERE news_id = $1`
 )

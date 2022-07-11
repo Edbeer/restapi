@@ -21,6 +21,8 @@ func (h *Handlers) initNewsHandlers(g *echo.Group) {
 	newsGroup := g.Group("/news")
 	{
 		newsGroup.POST("/create", h.CreateNews())
+		newsGroup.PUT("/:news_id", h.UpdateNews())
+		newsGroup.DELETE("/:news_id", h.DeleteNews())
 	}
 }
 
@@ -67,5 +69,24 @@ func (h *Handlers) UpdateNews() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, updatedNews)
+	}
+}
+
+// Delete news by id
+func (h *Handlers) DeleteNews() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		newsUUID, err := uuid.Parse(c.Param("news_id"))
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		if err := h.service.News.Delete(ctx, newsUUID); err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.NoContent(http.StatusOK)
 	}
 }

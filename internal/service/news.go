@@ -5,12 +5,14 @@ import (
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/google/uuid"
 )
 
 // News StoragePsql interface
 type NewsPsql interface {
 	Create(ctx context.Context, news *entity.News) (*entity.News, error)
 	Update(ctx context.Context, news *entity.News) (*entity.News, error)
+	Delete(ctx context.Context, newsID uuid.UUID) error
 }
 
 //  News service
@@ -40,4 +42,12 @@ func (n *NewsService) Update(ctx context.Context, news *entity.News) (*entity.Ne
 		return nil, err
 	}
 	return updatedNews, err
+}
+
+// Delete news by id
+func (n *NewsService) Delete(ctx context.Context, newsID uuid.UUID) error {
+	if err := n.storagePsql.Delete(ctx, newsID); err != nil {
+		return err
+	}
+	return nil
 }

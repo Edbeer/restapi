@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/Edbeer/restapi/pkg/httpe"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -47,4 +49,12 @@ func (s *NewsStorage) Update(ctx context.Context, news *entity.News) (*entity.Ne
 	}
 
 	return &n, nil
+}
+
+// Delete news
+func (s *NewsStorage) Delete(ctx context.Context, newsID uuid.UUID) error {
+	if _, err := s.psql.Exec(ctx, deleteNews, newsID); err != nil {
+		return httpe.NotFound
+	}
+	return nil
 }

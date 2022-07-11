@@ -34,7 +34,7 @@ func (h *Handlers) initAuthHandlers(g *echo.Group) {
 		authGroup.GET("/all", h.GetUsers())
 		authGroup.Use(middleware.AuthJWTMiddleware(*h.service.Auth, h.config))
 		authGroup.PUT("/:user_id", h.UpdateUser(), middleware.OwnerOrAdminMiddleware())
-		authGroup.DELETE("/:user_id", h.Delete(), middleware.RoleBasedAuthMiddleware([]string{"admin"}))
+		authGroup.DELETE("/:user_id", h.DeleteUser(), middleware.RoleBasedAuthMiddleware([]string{"admin"}))
 		authGroup.GET("/me", h.GetMe())
 	}
 }
@@ -91,7 +91,7 @@ func (h *Handlers) UpdateUser() echo.HandlerFunc {
 }
 
 // Delete User
-func (h *Handlers) Delete() echo.HandlerFunc {
+func (h *Handlers) DeleteUser() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
