@@ -33,7 +33,7 @@ func (h *Handlers) initAuthHandlers(g *echo.Group) {
 		authGroup.GET("/find", h.FindUsersByName())
 		authGroup.GET("/all", h.GetUsers())
 		authGroup.Use(middleware.AuthJWTMiddleware(*h.service.Auth, h.config))
-		authGroup.PUT("/:user_id", h.Update(), middleware.OwnerOrAdminMiddleware())
+		authGroup.PUT("/:user_id", h.UpdateUser(), middleware.OwnerOrAdminMiddleware())
 		authGroup.DELETE("/:user_id", h.Delete(), middleware.RoleBasedAuthMiddleware([]string{"admin"}))
 		authGroup.GET("/me", h.GetMe())
 	}
@@ -63,7 +63,7 @@ func (h *Handlers) Register() echo.HandlerFunc {
 }
 
 // Update User
-func (h *Handlers) Update() echo.HandlerFunc {
+func (h *Handlers) UpdateUser() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()

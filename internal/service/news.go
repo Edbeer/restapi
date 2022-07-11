@@ -10,6 +10,7 @@ import (
 // News StoragePsql interface
 type NewsPsql interface {
 	Create(ctx context.Context, news *entity.News) (*entity.News, error)
+	Update(ctx context.Context, news *entity.News) (*entity.News, error)
 }
 
 //  News service
@@ -30,4 +31,13 @@ func (n *NewsService) Create(ctx context.Context, news *entity.News) (*entity.Ne
 		return nil, err
 	}
 	return news, nil
+}
+
+// Update news items
+func (n *NewsService) Update(ctx context.Context, news *entity.News) (*entity.News, error) {
+	updatedNews, err := n.storagePsql.Update(ctx, news)
+	if err != nil {
+		return nil, err
+	}
+	return updatedNews, err
 }

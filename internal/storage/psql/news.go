@@ -17,17 +17,34 @@ func NewNewsStorage(psql *pgxpool.Pool) *NewsStorage {
 }
 
 // Create news
-func (n *NewsStorage) Create(ctx context.Context, news *entity.News) (*entity.News, error) {
-	var cn entity.News
-	if err := n.psql.QueryRow(ctx,
+func (s *NewsStorage) Create(ctx context.Context, news *entity.News) (*entity.News, error) {
+	var n entity.News
+	if err := s.psql.QueryRow(ctx,
 		createNews,
 		&news.AuthorID,
 		&news.Title,
 		&news.Content,
 		&news.Category,
-	).Scan(&cn); err != nil {
+	).Scan(&n); err != nil {
 		return nil, err
 	}
 
-	return &cn, nil
+	return &n, nil
+}
+
+// Update news item 
+func (s *NewsStorage) Update(ctx context.Context, news *entity.News) (*entity.News, error) {
+	var n entity.News
+	if err := s.psql.QueryRow(ctx, 
+		updateNews, 
+		&news.Title, 
+		&news.Content, 
+		&news.ImageURL, 
+		&news.Category,
+		&news.NewsID,
+	).Scan(&n); err != nil {
+		return nil, err
+	}
+
+	return &n, nil
 }
