@@ -16,7 +16,18 @@ func NewNewsStorage(psql *pgxpool.Pool) *NewsStorage {
 	return &NewsStorage{psql: psql}
 }
 
-// create news
+// Create news
 func (n *NewsStorage) Create(ctx context.Context, news *entity.News) (*entity.News, error) {
-	return &entity.News{}, nil
+	var cn entity.News
+	if err := n.psql.QueryRow(ctx,
+		createNews,
+		&news.AuthorID,
+		&news.Title,
+		&news.Content,
+		&news.Category,
+	).Scan(&cn); err != nil {
+		return nil, err
+	}
+
+	return &cn, nil
 }
