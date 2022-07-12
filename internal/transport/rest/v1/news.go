@@ -15,6 +15,8 @@ import (
 type NewsService interface {
 	Create(ctx context.Context, news *entity.News) (*entity.News, error)
 	Update(ctx context.Context, news *entity.News) (*entity.News, error)
+	GetNews(ctx context.Context, pq *utils.PaginationQuery) (*entity.NewsList, error)
+	GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entity.News, error)
 	Delete(ctx context.Context, newsID uuid.UUID) error
 }
 
@@ -104,7 +106,27 @@ func (h *Handlers) GetNews() echo.HandlerFunc {
 			return c.JSON(httpe.ErrorResponse(err))
 		}
 
-		news, err := h.service.News.GetNews(ctx, pq)
+		newsList, err := h.service.News.GetNews(ctx, pq)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.JSON(http.StatusOK, newsList)
+	}
+}
+
+// Get single news by id
+func (h *Handlers) GetNewsByID() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		newsUUID, err := uuid.Parse(c.Param("news_id"))
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		news, err := h.service.News.GetNewsByID(ctx, newsUUID)
 		if err != nil {
 			return c.JSON(httpe.ErrorResponse(err))
 		}
