@@ -15,4 +15,12 @@ const (
 				RETURNING *`
 
 	deleteNews = `DELETE FROM news WHERE news_id = $1`
+
+	getTotalNewsCount = `SELECT COUNT(news_id) FROM news`
+
+	getNews = `SELECT news_id, author_id, title, content, image_url, category, updated_at, created_at 
+			FROM news
+			WHERE news_id < (news_id + $1)
+			ORDER BY news_id DESC, created_at, updated_at
+			LIMIT $2`
 )

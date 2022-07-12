@@ -17,3 +17,13 @@ type News struct {
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
+
+// News list response
+type NewsList struct {
+	TotalCount int     `json:"total_count"`
+	TotalPages int     `json:"total_pages"`
+	Page       int     `json:"page"`
+	Size       int     `json:"size"`
+	HasMore    bool    `json:"has_more"`
+	News       []*News `json:"news"`
+}

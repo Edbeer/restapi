@@ -5,6 +5,7 @@ import (
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/Edbeer/restapi/pkg/utils"
 	"github.com/google/uuid"
 )
 
@@ -12,13 +13,14 @@ import (
 type NewsPsql interface {
 	Create(ctx context.Context, news *entity.News) (*entity.News, error)
 	Update(ctx context.Context, news *entity.News) (*entity.News, error)
+	GetNews(ctx context.Context, pq *utils.PaginationQuery) (*entity.NewsList, error)
 	Delete(ctx context.Context, newsID uuid.UUID) error
 }
 
 //  News service
 type NewsService struct {
-	config       *config.Config
-	storagePsql  NewsPsql
+	config      *config.Config
+	storagePsql NewsPsql
 }
 
 // News service constructor
@@ -50,4 +52,13 @@ func (n *NewsService) Delete(ctx context.Context, newsID uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+// Get news
+func (n *NewsService) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*entity.NewsList, error) {
+	newsList, err := n.storagePsql.GetNews(ctx, pq)
+	if err != nil {
+		return nil, err
+	}
+	return newsList, err
 }

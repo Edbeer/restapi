@@ -13,14 +13,16 @@ import (
 
 // News service interface
 type NewsService interface {
-	Create(ctx context.Context, news *entity.News) (*entity.News, error) 
+	Create(ctx context.Context, news *entity.News) (*entity.News, error)
 	Update(ctx context.Context, news *entity.News) (*entity.News, error)
+	Delete(ctx context.Context, newsID uuid.UUID) error
 }
 
 func (h *Handlers) initNewsHandlers(g *echo.Group) {
 	newsGroup := g.Group("/news")
 	{
 		newsGroup.POST("/create", h.CreateNews())
+		newsGroup.GET("/all", h.GetNews())
 		newsGroup.PUT("/:news_id", h.UpdateNews())
 		newsGroup.DELETE("/:news_id", h.DeleteNews())
 	}
@@ -42,11 +44,11 @@ func (h *Handlers) CreateNews() echo.HandlerFunc {
 			return c.JSON(httpe.ErrorResponse(err))
 		}
 
-		return c.JSON(http.StatusCreated, createdNews) 
+		return c.JSON(http.StatusCreated, createdNews)
 	}
 }
 
-// Update news 
+// Update news
 func (h *Handlers) UpdateNews() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -88,5 +90,25 @@ func (h *Handlers) DeleteNews() echo.HandlerFunc {
 		}
 
 		return c.NoContent(http.StatusOK)
+	}
+}
+
+// Get news
+func (h *Handlers) GetNews() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		pq, err := utils.GetPaginationFromCtx(c)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		news, err := h.service.News.GetNews(ctx, pq)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.JSON(http.StatusOK, news)
 	}
 }
