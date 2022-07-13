@@ -67,6 +67,7 @@ func (h *Handlers) initApi(e *echo.Echo) {
 		{
 			news.POST("/create", h.News.CreateNews())
 			news.GET("/all", h.News.GetNews())
+			news.GET("/search", h.News.SearchNews())
 			news.PUT("/:news_id", h.News.UpdateNews())
 			news.DELETE("/:news_id", h.News.DeleteNews())
 		}

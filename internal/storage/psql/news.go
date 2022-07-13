@@ -79,7 +79,7 @@ func (s *NewsStorage) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*
 	}
 
 	var newsList = make([]*entity.News, 0, pq.GetSize())
-	rows, err := tx.Query(ctx, getNews, pq.GetDifference(), pq.GetOrderBy(), pq.GetLimit())
+	rows, err := tx.Query(ctx, getNews, pq.GetDifference(), pq.GetLimit())
 	if err != nil {
 		return nil, err
 	}
@@ -122,4 +122,58 @@ func (s *NewsStorage) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entit
 		return nil, httpe.NotFound
 	}
 	return &news, nil
+}
+
+// Find news by title
+func (s *NewsStorage) SearchNews(ctx context.Context, pq *utils.PaginationQuery, title string) (*entity.NewsList, error) {
+	tx, err := s.psql.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+	
+	var totalCount int
+	err = tx.QueryRow(ctx, getTitleCount).Scan(&totalCount)
+	if err != nil {
+		return nil, err
+	}
+
+	if totalCount == 0 {
+		return &entity.NewsList{
+			TotalCount: totalCount,
+			TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+			Page:       pq.GetPage(),
+			Size:       pq.GetSize(),
+			HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+			News:       make([]*entity.News, 0),
+		}, nil
+	}
+
+	var newsList = make([]*entity.News, 0, pq.GetSize())
+	rows, err := tx.Query(ctx, findByTitle, title, pq.GetDifference(), pq.GetLimit())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var news *entity.News
+		if err := rows.Scan(&news); err != nil {
+			return nil, err
+		}
+		newsList = append(newsList, news)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &entity.NewsList{
+		TotalCount: totalCount,
+		TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+		Page:       pq.GetPage(),
+		Size:       pq.GetSize(),
+		HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+		News:       newsList,
+	}, nil
 }

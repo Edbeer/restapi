@@ -27,4 +27,15 @@ const (
 	getNewsByID = `SELECT news_id, author_id, title, content, image_url, category, updated_at, created_at
 				FROM news
 				WHERE news_id = $1`
+
+	findByTitle = `SELECT  news_id, author_id, title, content, image_url, category, updated_at, created_at
+				FROM news	
+				WHERE title ILIKE '%' || $1 || '%' 
+					and news_id < (news_id + $2)
+				ORDER BY news_id DESC, title, created_at, updated_at
+				LIMIT $3`
+
+	getTitleCount = `SELECT COUNT(title)
+					FROM news
+					WHERE title ILIKE '%' || $1 || '%'`
 )

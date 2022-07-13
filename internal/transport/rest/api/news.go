@@ -19,6 +19,7 @@ type NewsService interface {
 	Update(ctx context.Context, news *entity.News) (*entity.News, error)
 	GetNews(ctx context.Context, pq *utils.PaginationQuery) (*entity.NewsList, error)
 	GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entity.News, error)
+	SearchNews(ctx context.Context, pq *utils.PaginationQuery, title string) (*entity.NewsList, error)
 	Delete(ctx context.Context, newsID uuid.UUID) error
 }
 
@@ -140,5 +141,27 @@ func (h *NewsHandler) GetNewsByID() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, news)
+	}
+}
+
+// Find news by title
+func (h *NewsHandler) SearchNews() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		pq, err := utils.GetPaginationFromCtx(c)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		title := c.QueryParam("title")
+
+		newsList, err := h.newsService.SearchNews(ctx, pq, title)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.JSON(http.StatusOK, newsList)
 	}
 }
