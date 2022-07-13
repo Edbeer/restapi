@@ -73,9 +73,6 @@ func (a *AuthStorage) GetUserByID(ctx context.Context, userID uuid.UUID) (*entit
 // Find users by name
 func (a *AuthStorage) FindUsersByName(ctx context.Context,
 	name string, pq *utils.PaginationQuery) (*entity.UsersList, error) {
-
-	var totalCount int
-
 	// Start a transaction to ensure user count
 	tx, err := a.psql.Begin(ctx)
 	if err != nil {
@@ -83,9 +80,21 @@ func (a *AuthStorage) FindUsersByName(ctx context.Context,
 	}
 	defer tx.Rollback(ctx)
 
+	var totalCount int
 	err = tx.QueryRow(ctx, getTotalCount).Scan(&totalCount)
 	if err != nil {
 		return nil, err
+	}
+
+	if totalCount == 0 {
+		return &entity.UsersList{
+			TotalCount: totalCount,
+			TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+			Page:       pq.GetPage(),
+			Size:       pq.GetSize(),
+			HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+			Users:      make([]*entity.User, 0),
+		}, nil
 	}
 
 	rows, err := tx.Query(ctx, findUsersByName, name)
@@ -100,7 +109,6 @@ func (a *AuthStorage) FindUsersByName(ctx context.Context,
 		if err := rows.Scan(&user); err != nil {
 			return nil, err
 		}
-
 		users = append(users, &user)
 	}
 
@@ -120,8 +128,6 @@ func (a *AuthStorage) FindUsersByName(ctx context.Context,
 
 // Get users
 func (a *AuthStorage) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*entity.UsersList, error) {
-	var totalCount int
-
 	// Start a transaction to ensure user count
 	tx, err := a.psql.Begin(ctx)
 	if err != nil {
@@ -129,9 +135,21 @@ func (a *AuthStorage) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (
 	}
 	defer tx.Rollback(ctx)
 
+	var totalCount int
 	err = tx.QueryRow(ctx, getTotal).Scan(&totalCount)
 	if err != nil {
 		return nil, err
+	}
+
+	if totalCount == 0 {
+		return &entity.UsersList{
+			TotalCount: totalCount,
+			TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+			Page:       pq.GetPage(),
+			Size:       pq.GetSize(),
+			HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+			Users:      make([]*entity.User, 0),
+		}, nil
 	}
 
 	rows, err := tx.Query(ctx, getUsers, pq.GetDifference(), pq.GetOrderBy(), pq.GetLimit())
@@ -146,7 +164,6 @@ func (a *AuthStorage) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (
 		if err := rows.Scan(&user); err != nil {
 			return nil, err
 		}
-
 		users = append(users, &user)
 	}
 
