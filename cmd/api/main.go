@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/Edbeer/restapi/config"
-	"github.com/Edbeer/restapi/internal/server"
+	server "github.com/Edbeer/restapi/internal/transport/rest"
 	"github.com/Edbeer/restapi/pkg/db/postgres"
 	"github.com/Edbeer/restapi/pkg/db/redis"
 	"github.com/Edbeer/restapi/pkg/logger"

@@ -4,7 +4,6 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-
 type Storage struct {
 	Auth *AuthStorage
 	News *NewsStorage
