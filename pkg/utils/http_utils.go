@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/Edbeer/restapi/config"
+	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/Edbeer/restapi/pkg/httpe"
 	"github.com/labstack/echo/v4"
 )
 
@@ -34,4 +36,12 @@ func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
 		HttpOnly:   cfg.Cookie.HTTPOnly, // true
 		SameSite:   0,
 	}
+}
+
+func GetUserFromCtx(ctx context.Context) (*entity.User, error) {
+	user, ok := ctx.Value("user").(*entity.User)
+	if !ok {
+		return nil, httpe.Unauthorized
+	}
+	return user, nil
 }

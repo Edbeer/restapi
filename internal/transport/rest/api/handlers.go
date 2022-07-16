@@ -10,15 +10,25 @@ import (
 )
 
 type Deps struct {
-	AuthService AuthService
-	NewsService NewsService
-	Config      *config.Config
-	Logger      logger.Logger
+	AuthService     AuthService
+	NewsService     NewsService
+	CommentsService CommentsService
+	Config          *config.Config
+	Logger          logger.Logger
 }
 
 type Handlers struct {
-	Auth *AuthHandler
-	News *NewsHandler
+	auth     *AuthHandler
+	news     *NewsHandler
+	comments *CommentsHandler
+}
+
+func NewHandlers(deps Deps) *Handlers {
+	return &Handlers{
+		auth:     NewAuthHandler(deps.AuthService, deps.Config, deps.Logger),
+		news:     NewNewsHandler(deps.NewsService, deps.Config, deps.Logger),
+		comments: NewCommentsHandler(deps.CommentsService, deps.Config, deps.Logger),
+	}
 }
 
 func (h *Handlers) Init(e *echo.Echo) error {
@@ -52,32 +62,32 @@ func (h *Handlers) initApi(e *echo.Echo) {
 	{
 		auth := api.Group("/auth")
 		{
-			auth.POST("/register", h.Auth.Register())
-			auth.POST("/login", h.Auth.Login())
-			auth.POST("/logout", h.Auth.Logout())
-			auth.GET("/:user_id", h.Auth.GetUserByID())
-			auth.GET("/find", h.Auth.FindUsersByName())
-			auth.GET("/all", h.Auth.GetUsers())
+			auth.POST("/register", h.auth.Register())
+			auth.POST("/login", h.auth.Login())
+			auth.POST("/logout", h.auth.Logout())
+			auth.GET("/:user_id", h.auth.GetUserByID())
+			auth.GET("/find", h.auth.FindUsersByName())
+			auth.GET("/all", h.auth.GetUsers())
 			// auth.Use(middleware.AuthJWTMiddleware(*h.service.Auth, h.config))
-			auth.PUT("/:user_id", h.Auth.UpdateUser(), middle.OwnerOrAdminMiddleware())
-			auth.DELETE("/:user_id", h.Auth.DeleteUser(), middle.RoleBasedAuthMiddleware([]string{"admin"}))
-			auth.GET("/me", h.Auth.GetMe())
+			auth.PUT("/:user_id", h.auth.UpdateUser(), middle.OwnerOrAdminMiddleware())
+			auth.DELETE("/:user_id", h.auth.DeleteUser(), middle.RoleBasedAuthMiddleware([]string{"admin"}))
+			auth.GET("/me", h.auth.GetMe())
 		}
+
 		news := api.Group("/news")
 		{
-			news.POST("/create", h.News.CreateNews())
-			news.GET("/all", h.News.GetNews())
-			news.GET("/:news_id", h.News.GetNewsByID())
-			news.GET("/search", h.News.SearchNews())
-			news.PUT("/:news_id", h.News.UpdateNews())
-			news.DELETE("/:news_id", h.News.DeleteNews())
+			news.POST("/create", h.news.CreateNews())
+			news.GET("/all", h.news.GetNews())
+			news.GET("/:news_id", h.news.GetNewsByID())
+			news.GET("/search", h.news.SearchNews())
+			news.PUT("/:news_id", h.news.UpdateNews())
+			news.DELETE("/:news_id", h.news.DeleteNews())
 		}
-	}
-}
 
-func NewHandlers(deps Deps) *Handlers {
-	return &Handlers{
-		Auth: NewAuthHandler(deps.AuthService, deps.Config, deps.Logger),
-		News: NewNewsHandler(deps.NewsService, deps.Config, deps.Logger),
+		comments := api.Group("/comments")
+		{
+			comments.POST("", h.comments.CreateComments())
+		}
+
 	}
 }

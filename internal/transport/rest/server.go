@@ -29,11 +29,11 @@ type Server struct {
 // New server constructor
 func NewServer(config *config.Config, psqlClient *pgxpool.Pool, redisClient *redis.Client, logger logger.Logger) *Server {
 	return &Server{
-		echo: echo.New(), 
-		psqlClient: psqlClient, 
-		redisClient: redisClient, 
-		config: config, 
-		logger: logger,
+		echo:        echo.New(),
+		psqlClient:  psqlClient,
+		redisClient: redisClient,
+		config:      config,
+		logger:      logger,
 	}
 }
 
@@ -53,10 +53,11 @@ func (s *Server) Run() error {
 			PsqlStorage:  psql,
 			RedisStorage: redis})
 		handler := api.NewHandlers(api.Deps{
-			AuthService: service.Auth,
-			NewsService: service.News,
-			Config:      cfg,
-			Logger:      s.logger,
+			AuthService:     service.Auth,
+			NewsService:     service.News,
+			CommentsService: service.Comments,
+			Config:          cfg,
+			Logger:          s.logger,
 		})
 		if err := handler.Init(s.echo); err != nil {
 			s.logger.Fatal(err)
@@ -96,10 +97,11 @@ func (s *Server) Run() error {
 			PsqlStorage:  psql,
 			RedisStorage: redis})
 		handler := api.NewHandlers(api.Deps{
-			AuthService: service.Auth,
-			NewsService: service.News,
-			Config:      cfg,
-			Logger:      s.logger,
+			AuthService:     service.Auth,
+			NewsService:     service.News,
+			CommentsService: service.Comments,
+			Config:          cfg,
+			Logger:          s.logger,
 		})
 		if err := handler.Init(e); err != nil {
 			s.logger.Fatal(err)
