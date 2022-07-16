@@ -30,6 +30,17 @@ CREATE TABLE news
     content    TEXT         NOT NULL check ( content <> '' ),
     image_url  VARCHAR(1024) check ( image_url <> '' ),
     category   VARCHAR(250),
-    created_at TIMESTAMP    NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP             DEFAULT current_timestamp
+     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE          DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE comments
+(
+    comment_id UUID PRIMARY KEY         DEFAULT uuid_generate_v4(),
+    author_id UUID                      NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+    news_id UUID                        NOT NULL REFERENCES news (news_id) ON DELETE CASCADE,
+    message VARCHAR(1024)               NOT NULL CHECK ( message <> '' ),
+    LIKES BIGINT                        DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
