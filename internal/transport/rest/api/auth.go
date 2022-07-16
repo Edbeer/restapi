@@ -64,7 +64,7 @@ func (h *AuthHandler) Register() echo.HandlerFunc {
 }
 
 // Update User
-func (h *AuthHandler) UpdateUser() echo.HandlerFunc {
+func (h *AuthHandler) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
@@ -92,7 +92,7 @@ func (h *AuthHandler) UpdateUser() echo.HandlerFunc {
 }
 
 // Delete User
-func (h *AuthHandler) DeleteUser() echo.HandlerFunc {
+func (h *AuthHandler) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()

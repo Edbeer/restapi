@@ -69,24 +69,25 @@ func (h *Handlers) initApi(e *echo.Echo) {
 			auth.GET("/find", h.auth.FindUsersByName())
 			auth.GET("/all", h.auth.GetUsers())
 			// auth.Use(middleware.AuthJWTMiddleware(*h.service.Auth, h.config))
-			auth.PUT("/:user_id", h.auth.UpdateUser(), middle.OwnerOrAdminMiddleware())
-			auth.DELETE("/:user_id", h.auth.DeleteUser(), middle.RoleBasedAuthMiddleware([]string{"admin"}))
+			auth.PUT("/:user_id", h.auth.Update(), middle.OwnerOrAdminMiddleware())
+			auth.DELETE("/:user_id", h.auth.Delete(), middle.RoleBasedAuthMiddleware([]string{"admin"}))
 			auth.GET("/me", h.auth.GetMe())
 		}
 
 		news := api.Group("/news")
 		{
-			news.POST("/create", h.news.CreateNews())
+			news.POST("/create", h.news.Create())
 			news.GET("/all", h.news.GetNews())
 			news.GET("/:news_id", h.news.GetNewsByID())
 			news.GET("/search", h.news.SearchNews())
-			news.PUT("/:news_id", h.news.UpdateNews())
-			news.DELETE("/:news_id", h.news.DeleteNews())
+			news.PUT("/:news_id", h.news.Update())
+			news.DELETE("/:news_id", h.news.Delete())
 		}
 
 		comments := api.Group("/comments")
 		{
-			comments.POST("", h.comments.CreateComments())
+			comments.POST("", h.comments.Create())
+			comments.DELETE("/delete", h.comments.Delete())
 		}
 
 	}

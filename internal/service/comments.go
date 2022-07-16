@@ -6,11 +6,13 @@ import (
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/Edbeer/restapi/internal/storage/psql"
+	"github.com/google/uuid"
 )
 
 // Comments storage interface
 type CommentsStorage interface {
-	CreateComments(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
+	Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
+	Delete(ctx context.Context, commentID uuid.UUID) error
 }
 
 // Comments service
@@ -24,10 +26,19 @@ func NewCommentsService(config *config.Config, commentsStorage *psql.CommentsSto
 	return &CommentsService{config: config, commentsStorage: commentsStorage}
 }
 
-func (c *CommentsService) CreateComments(ctx context.Context, comments *entity.Comment) (*entity.Comment, error) {
-	comments, err := c.commentsStorage.CreateComments(ctx, comments)
+// Create comments
+func (c *CommentsService) Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error) {
+	comments, err := c.commentsStorage.Create(ctx, comments)
 	if err != nil {
 		return nil, err
 	}
 	return comments, nil
+}
+
+// Delete comments
+func (c *CommentsService) Delete(ctx context.Context, commentID uuid.UUID) error {
+	if err := c.commentsStorage.Delete(ctx, commentID); err != nil {
+		return err
+	}
+	return nil
 }

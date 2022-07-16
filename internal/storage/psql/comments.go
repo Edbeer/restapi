@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -18,7 +19,7 @@ func NewCommentsStorage(psql *pgxpool.Pool) *CommentsStorage {
 }
 
 // Create comments
-func (s *CommentsStorage) CreateComments(ctx context.Context, comments *entity.Comment) (*entity.Comment, error) {
+func (s *CommentsStorage) Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error) {
 	var c entity.Comment
 	if err := s.psql.QueryRow(ctx, 
 		createComments, 
@@ -29,4 +30,12 @@ func (s *CommentsStorage) CreateComments(ctx context.Context, comments *entity.C
 		return nil, err
 	}
 	return &c, nil
+}
+
+// Delete comments
+func (s *CommentsStorage) Delete(ctx context.Context, commentID uuid.UUID) error {
+	if _, err := s.psql.Exec(ctx, deleteComment, commentID); err != nil {
+		return err
+	}
+	return nil
 }

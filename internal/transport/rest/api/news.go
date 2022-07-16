@@ -40,7 +40,7 @@ func NewNewsHandler(newsService NewsService, config *config.Config, logger logge
 }
 
 // Create news
-func (h *NewsHandler) CreateNews() echo.HandlerFunc {
+func (h *NewsHandler) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
@@ -60,7 +60,7 @@ func (h *NewsHandler) CreateNews() echo.HandlerFunc {
 }
 
 // Update news
-func (h *NewsHandler) UpdateNews() echo.HandlerFunc {
+func (h *NewsHandler) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
@@ -86,7 +86,7 @@ func (h *NewsHandler) UpdateNews() echo.HandlerFunc {
 }
 
 // Delete news by id
-func (h *NewsHandler) DeleteNews() echo.HandlerFunc {
+func (h *NewsHandler) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()

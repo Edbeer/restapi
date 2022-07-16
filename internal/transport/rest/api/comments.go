@@ -6,14 +6,17 @@ import (
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/Edbeer/restapi/pkg/httpe"
 	"github.com/Edbeer/restapi/pkg/logger"
 	"github.com/Edbeer/restapi/pkg/utils"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 // Comments Service interface
 type CommentsService interface {
-	CreateComments(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
+	Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
+	Delete(ctx context.Context, commentID uuid.UUID) error
 }
 
 // Comments Handler
@@ -33,7 +36,7 @@ func NewCommentsHandler(commentsService CommentsService, config *config.Config, 
 }
 
 // Create Comments
-func (h *CommentsHandler) CreateComments() echo.HandlerFunc {
+func (h *CommentsHandler) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
@@ -45,11 +48,30 @@ func (h *CommentsHandler) CreateComments() echo.HandlerFunc {
 		comment := &entity.Comment{}
 		comment.AuthorID = user.ID
 
-		comments, err := h.commentsService.CreateComments(ctx, comment)
+		comments, err := h.commentsService.Create(ctx, comment)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
 		return c.JSON(http.StatusCreated, comments)
+	}
+}
+
+// Delete comments
+func (h *CommentsHandler) Delete() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		commentUUID, err := uuid.Parse(c.Param("comment_id"))
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		if err := h.commentsService.Delete(ctx, commentUUID); err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.NoContent(http.StatusOK)
 	}
 }
