@@ -12,6 +12,7 @@ import (
 // Comments storage interface
 type CommentsStorage interface {
 	Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
+	Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
 	Delete(ctx context.Context, commentID uuid.UUID) error
 }
 
@@ -29,6 +30,15 @@ func NewCommentsService(config *config.Config, commentsStorage *psql.CommentsSto
 // Create comments
 func (c *CommentsService) Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error) {
 	comments, err := c.commentsStorage.Create(ctx, comments)
+	if err != nil {
+		return nil, err
+	}
+	return comments, nil
+}
+
+// Update comments
+func (c *CommentsService) Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error) {
+	comments, err := c.commentsStorage.Update(ctx, comments)
 	if err != nil {
 		return nil, err
 	}

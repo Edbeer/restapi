@@ -32,6 +32,19 @@ func (s *CommentsStorage) Create(ctx context.Context, comments *entity.Comment) 
 	return &c, nil
 }
 
+// Update comments
+func (s *CommentsStorage) Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error) {
+	var c entity.Comment
+	if err := s.psql.QueryRow(ctx, 
+		updateComment, 
+		&comments.Message, 
+		&comments.CommentID,
+	).Scan(&c); err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
 // Delete comments
 func (s *CommentsStorage) Delete(ctx context.Context, commentID uuid.UUID) error {
 	if _, err := s.psql.Exec(ctx, deleteComment, commentID); err != nil {

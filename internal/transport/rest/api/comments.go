@@ -16,6 +16,7 @@ import (
 // Comments Service interface
 type CommentsService interface {
 	Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
+	Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
 	Delete(ctx context.Context, commentID uuid.UUID) error
 }
 
@@ -54,6 +55,36 @@ func (h *CommentsHandler) Create() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusCreated, comments)
+	}
+}
+
+// Update comments
+func (h *CommentsHandler) Update() echo.HandlerFunc {
+	type UpdatedComment struct {
+		Message string `json:"message" db:"message" validate:"required,gte=0"`
+		Likes   int64  `json:"likes" db:"likes" validate:"omitempty"`
+	}
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		commentUUID, err := uuid.Parse(c.Param("comment_id"))
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		comm := &UpdatedComment{}
+
+		updatedComment, err := h.commentsService.Update(ctx, &entity.Comment{
+			CommentID: commentUUID,
+			Message: comm.Message,
+			Likes: comm.Likes,
+		})
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.JSON(http.StatusOK, updatedComment)
 	}
 }
 

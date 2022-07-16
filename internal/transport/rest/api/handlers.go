@@ -87,6 +87,7 @@ func (h *Handlers) initApi(e *echo.Echo) {
 		comments := api.Group("/comments")
 		{
 			comments.POST("", h.comments.Create())
+			comments.PUT("/:comments_id", h.comments.Update())
 			comments.DELETE("/delete", h.comments.Delete())
 		}
 
