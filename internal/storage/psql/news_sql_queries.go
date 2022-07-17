@@ -24,9 +24,17 @@ const (
 			ORDER BY news_id DESC, created_at, updated_at
 			LIMIT $2`
 
-	getNewsByID = `SELECT news_id, author_id, title, content, image_url, category, updated_at, created_at
-				FROM news
-				WHERE news_id = $1`
+	getNewsByID = `SELECT n.news_id,
+				n.title,
+				n.content,
+				n.updated_at,
+				n.image_url,
+				n.category,
+				CONCAT(u.first_name, ' ', u.last_name) as author,
+				u.user_id as author_id
+			FROM news n
+				LEFT JOIN users u on u.user_id = n.author_id
+			WHERE news_id = $1`
 
 	findByTitle = `SELECT  news_id, author_id, title, content, image_url, category, updated_at, created_at
 				FROM news	

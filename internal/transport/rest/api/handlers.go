@@ -88,6 +88,7 @@ func (h *Handlers) initApi(e *echo.Echo) {
 		{
 			comments.POST("", h.comments.Create())
 			comments.GET("/:comments_id", h.comments.GetByID())
+			comments.GET("/byNewsID/:news_id", h.comments.GetAllByNewsID())
 			comments.PUT("/:comments_id", h.comments.Update())
 			comments.DELETE("/delete", h.comments.Delete())
 		}

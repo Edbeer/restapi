@@ -27,3 +27,13 @@ type CommentResp struct {
 	Likes     int64     `json:"likes" db:"likes" validate:"omitempty"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
+
+// Comment response list
+type CommentsList struct {
+	TotalCount int            `json:"total_count"`
+	TotalPages int            `json:"total_pages"`
+	Page       int            `json:"page"`
+	Size       int            `json:"size"`
+	HasMore    bool           `json:"has_more"`
+	Comments   []*CommentResp `json:"comments"`
+}

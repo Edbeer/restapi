@@ -14,6 +14,17 @@ const (
 
 	getCommentByID = `SELECT concat(u.first_name, ' ', u.last_name) as author, u.avatar as avatar_url, c.message, c.likes, c.updated_at, c.author_id, c.comment_id	
 				FROM comments c
-				LEFT JOIN users u on c.author_id = u.user_id
+					LEFT JOIN users u on c.author_id = u.user_id
 				WHERE c.comment_id = $1`
+
+	getCommentsCount = `SELECT COUNT (comments_id)
+							FROM comments
+							WHERE news_id = $1`
+
+	getCommentsByNewsID = `SELECT concat(u.first_name, ' ', u.last_name) as author, u.avatar as avatar_url, c.message, c.likes, c.updated_at, c.author_id, c.comment_id
+						FROM comments c
+						LEFT JOIN users u on c.author_id = u.user_id
+						WHERE c.news_id = $1 and c.news_id < (c.news_id + $2)
+						ORDER BY updated_at
+						LIMIT $3`
 )

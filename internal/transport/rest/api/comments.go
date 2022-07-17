@@ -17,6 +17,7 @@ import (
 type CommentsService interface {
 	Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
 	Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
+	GetAllByNewsID(ctx context.Context, newsID uuid.UUID, pq *utils.PaginationQuery) (*entity.CommentsList, error)
 	GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentResp, error)
 	Delete(ctx context.Context, commentID uuid.UUID) error
 }
@@ -125,5 +126,30 @@ func (h *CommentsHandler) GetByID() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, comment)
+	}
+}
+
+// Get comments by news id
+func (h *CommentsHandler) GetAllByNewsID() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		newsID, err := uuid.Parse(c.Param("news_id"))
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		pq, err := utils.GetPaginationFromCtx(c)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		comentsList, err := h.commentsService.GetAllByNewsID(ctx, newsID, pq)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.JSON(http.StatusOK, comentsList)
 	}
 }

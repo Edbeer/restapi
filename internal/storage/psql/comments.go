@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/Edbeer/restapi/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -21,8 +22,8 @@ func NewCommentsStorage(psql *pgxpool.Pool) *CommentsStorage {
 // Create comments
 func (s *CommentsStorage) Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error) {
 	var c entity.Comment
-	if err := s.psql.QueryRow(ctx, 
-		createComments, 
+	if err := s.psql.QueryRow(ctx,
+		createComments,
 		&comments.AuthorID,
 		&comments.NewsID,
 		&comments.Message,
@@ -35,9 +36,9 @@ func (s *CommentsStorage) Create(ctx context.Context, comments *entity.Comment) 
 // Update comments
 func (s *CommentsStorage) Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error) {
 	var c entity.Comment
-	if err := s.psql.QueryRow(ctx, 
-		updateComment, 
-		&comments.Message, 
+	if err := s.psql.QueryRow(ctx,
+		updateComment,
+		&comments.Message,
 		&comments.CommentID,
 	).Scan(&c); err != nil {
 		return nil, err
@@ -60,4 +61,56 @@ func (s *CommentsStorage) GetByID(ctx context.Context, commentID uuid.UUID) (*en
 		return nil, err
 	}
 	return &comment, nil
+}
+
+// Get all comments by news id
+func (s *CommentsStorage) GetAllByNewsID(ctx context.Context,
+	newsID uuid.UUID, pq *utils.PaginationQuery) (*entity.CommentsList, error) {
+
+	tx, err := s.psql.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var totalCount int
+	if err := tx.QueryRow(ctx, getCommentsCount, newsID).Scan(&totalCount); err != nil {
+		return nil, err
+	}
+
+	if totalCount == 0 {
+		return &entity.CommentsList{
+			TotalCount: totalCount,
+			TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+			Page:       pq.GetPage(),
+			Size:       pq.GetSize(),
+			HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetPage()),
+			Comments:   make([]*entity.CommentResp, 0),
+		}, nil
+	}
+
+	rows, err := tx.Query(ctx, getCommentsByNewsID, newsID, pq.GetDifference(), pq.GetLimit())
+	if err != nil {
+		return nil, err
+	}
+	var commentsList = make([]*entity.CommentResp, 0, pq.GetSize())
+	for rows.Next() {
+		comment := &entity.CommentResp{}
+		if err := rows.Scan(&comment); err != nil {
+			return nil, err
+		}
+		commentsList = append(commentsList, comment)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &entity.CommentsList{
+		TotalCount: totalCount,
+		TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+		Page:       pq.GetPage(),
+		Size:       pq.GetSize(),
+		HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetPage()),
+		Comments:   commentsList,
+	}, nil
 }
