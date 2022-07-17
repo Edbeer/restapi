@@ -52,3 +52,12 @@ func (s *CommentsStorage) Delete(ctx context.Context, commentID uuid.UUID) error
 	}
 	return nil
 }
+
+// Get by id comment
+func (s *CommentsStorage) GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentResp, error) {
+	var comment entity.CommentResp
+	if err := s.psql.QueryRow(ctx, getCommentByID, commentID).Scan(&comment); err != nil {
+		return nil, err
+	}
+	return &comment, nil
+}

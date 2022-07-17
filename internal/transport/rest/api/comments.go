@@ -17,6 +17,7 @@ import (
 type CommentsService interface {
 	Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
 	Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
+	GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentResp, error)
 	Delete(ctx context.Context, commentID uuid.UUID) error
 }
 
@@ -104,5 +105,25 @@ func (h *CommentsHandler) Delete() echo.HandlerFunc {
 		}
 
 		return c.NoContent(http.StatusOK)
+	}
+}
+
+// Get comment by id
+func (h *CommentsHandler) GetByID() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		commentID, err := uuid.Parse(c.Param("comment_id"))
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		comment, err := h.commentsService.GetByID(ctx, commentID)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		return c.JSON(http.StatusOK, comment)
 	}
 }

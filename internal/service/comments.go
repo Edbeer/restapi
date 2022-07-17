@@ -13,6 +13,7 @@ import (
 type CommentsStorage interface {
 	Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
 	Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
+	GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentResp, error)
 	Delete(ctx context.Context, commentID uuid.UUID) error
 }
 
@@ -51,4 +52,13 @@ func (c *CommentsService) Delete(ctx context.Context, commentID uuid.UUID) error
 		return err
 	}
 	return nil
+}
+
+// Get comment by id
+func (c *CommentsService) GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentResp, error) {
+	comment, err := c.commentsStorage.GetByID(ctx, commentID)
+	if err != nil {
+		return nil, err
+	}
+	return comment, nil
 }

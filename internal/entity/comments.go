@@ -16,3 +16,14 @@ type Comment struct {
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
+
+// Comment response
+type CommentResp struct {
+	CommentID uuid.UUID `json:"comment_id" db:"comment_id" validate:"omitempty,uuid"`
+	AuthorID  uuid.UUID `json:"author_id" db:"author_id" validate:"required"`
+	Author    string    `json:"author" db:"author" validate:"required"`
+	AvatarURL *string   `json:"avatar_url" db:"avatar_url"`
+	Message   string    `json:"message" db:"message" validate:"required,gte=5"`
+	Likes     int64     `json:"likes" db:"likes" validate:"omitempty"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}
