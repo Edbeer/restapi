@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	basePrefix    = "api-auth:"
-	cacheDuration = 3600
+	baseAuthPrefix    = "api-auth:"
+	cacheAuthDuration = 3600
 )
 
 // Auth StoragePsql interface
@@ -46,7 +46,12 @@ type AuthService struct {
 
 // Auth service constructor
 func NewAuthService(config *config.Config, storagePsql AuthPsql, storageRedis AuthRedis, logger logger.Logger) *AuthService {
-	return &AuthService{config: config, storagePsql: storagePsql, storageRedis: storageRedis, logger: logger}
+	return &AuthService{
+		config:       config,
+		storagePsql:  storagePsql,
+		storageRedis: storageRedis,
+		logger:       logger,
+	}
 }
 
 // Register new user
@@ -92,7 +97,7 @@ func (a *AuthService) Update(ctx context.Context, user *entity.User) (*entity.Us
 	}
 	updatedUser.SanitizePassword()
 
-	if err = a.storageRedis.DeleteUserCtx(ctx, a.GenerateUserKey(user.ID.String())); err != nil {
+	if err = a.storageRedis.DeleteUserCtx(ctx, a.generateUserKey(user.ID.String())); err != nil {
 		a.logger.Errorf("AuthService.Update.DeleteUserCtx: %v", err)
 	}
 
@@ -106,7 +111,7 @@ func (a *AuthService) Delete(ctx context.Context, userID uuid.UUID) error {
 	if err := a.storagePsql.Delete(ctx, userID); err != nil {
 		return err
 	}
-	if err := a.storageRedis.DeleteUserCtx(ctx, a.GenerateUserKey(userID.String())); err != nil {
+	if err := a.storageRedis.DeleteUserCtx(ctx, a.generateUserKey(userID.String())); err != nil {
 		a.logger.Errorf("AuthService.Delete.DeleteUserCtx: %v", err)
 	}
 	return nil
@@ -114,7 +119,7 @@ func (a *AuthService) Delete(ctx context.Context, userID uuid.UUID) error {
 
 // Get user by id
 func (a *AuthService) GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error) {
-	cachedUser, err := a.storageRedis.GetByIDCtx(ctx, a.GenerateUserKey(userID.String()))
+	cachedUser, err := a.storageRedis.GetByIDCtx(ctx, a.generateUserKey(userID.String()))
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +132,7 @@ func (a *AuthService) GetUserByID(ctx context.Context, userID uuid.UUID) (*entit
 		return nil, err
 	}
 
-	if err := a.storageRedis.SetUserCtx(ctx, a.GenerateUserKey(userID.String()), cacheDuration, user); err != nil {
+	if err := a.storageRedis.SetUserCtx(ctx, a.generateUserKey(userID.String()), cacheAuthDuration, user); err != nil {
 		a.logger.Errorf("AuthService.GetByID.SetUserCtx: %v", err)
 	}
 	user.SanitizePassword()
@@ -179,6 +184,6 @@ func (a *AuthService) Login(ctx context.Context, user *entity.User) (*entity.Use
 	}, nil
 }
 
-func (a *AuthService) GenerateUserKey(userID string) string {
-	return fmt.Sprintf("%s: %s", basePrefix, userID)
+func (a *AuthService) generateUserKey(userID string) string {
+	return fmt.Sprintf("%s: %s", baseAuthPrefix, userID)
 }

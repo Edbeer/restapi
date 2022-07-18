@@ -22,7 +22,7 @@ type Deps struct {
 
 func NewService(deps Deps) *Services {
 	authService := NewAuthService(deps.Config, deps.PsqlStorage.Auth, deps.RedisStorage.Auth, deps.Logger)
-	newsService := NewNewsService(deps.Config, deps.PsqlStorage.News)
+	newsService := NewNewsService(deps.Config, deps.PsqlStorage.News, deps.RedisStorage.News, deps.Logger)
 	commentsService := NewCommentsService(deps.Config, deps.PsqlStorage.Comments)
 	return &Services{
 		Auth:     authService,

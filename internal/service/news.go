@@ -2,11 +2,18 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/Edbeer/restapi/pkg/logger"
 	"github.com/Edbeer/restapi/pkg/utils"
 	"github.com/google/uuid"
+)
+
+var (
+	baseNewsPrefix    = "api-news:"
+	cacheNewsDuration = 3600
 )
 
 // News StoragePsql interface
@@ -19,15 +26,28 @@ type NewsPsql interface {
 	Delete(ctx context.Context, newsID uuid.UUID) error
 }
 
+// News StorageRedis interface
+type NewsRedis interface {
+	GetNewsByIDCtx(ctx context.Context, key string) (*entity.NewsBase, error)
+	SetNewsCtx(ctx context.Context, key string, seconds int, news *entity.NewsBase) error
+}
+
 //  News service
 type NewsService struct {
-	config      *config.Config
-	storagePsql NewsPsql
+	logger       logger.Logger
+	config       *config.Config
+	storagePsql  NewsPsql
+	storageRedis NewsRedis
 }
 
 // News service constructor
-func NewNewsService(config *config.Config, storagePsql NewsPsql) *NewsService {
-	return &NewsService{config: config, storagePsql: storagePsql}
+func NewNewsService(config *config.Config, storagePsql NewsPsql, redis NewsRedis, logger logger.Logger) *NewsService {
+	return &NewsService{
+		config:       config,
+		storagePsql:  storagePsql,
+		storageRedis: redis,
+		logger:       logger,
+	}
 }
 
 // Create news
@@ -67,10 +87,23 @@ func (n *NewsService) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*
 
 // Get single news by id
 func (n *NewsService) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entity.NewsBase, error) {
+	cachedNews, err := n.storageRedis.GetNewsByIDCtx(ctx, n.generateNewsKey(newsID.String()))
+	if err != nil {
+		return nil, err
+	}
+	if cachedNews != nil {
+		return cachedNews, nil
+	}
+
 	news, err := n.storagePsql.GetNewsByID(ctx, newsID)
 	if err != nil {
 		return nil, err
 	}
+
+	if err := n.storageRedis.SetNewsCtx(ctx, newsID.String(), cacheNewsDuration, news); err != nil {
+		n.logger.Errorf("NewsService.GetNewsByID.SetNewsCtx: %v", err)
+	}
+
 	return news, nil
 }
 
@@ -81,4 +114,8 @@ func (n *NewsService) SearchNews(ctx context.Context, pq *utils.PaginationQuery,
 		return nil, err
 	}
 	return news, nil
+}
+
+func (n *NewsService) generateNewsKey(newsID string) string {
+	return fmt.Sprintf("%s: %s", baseNewsPrefix, newsID)
 }
