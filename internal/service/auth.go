@@ -7,6 +7,7 @@ import (
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/Edbeer/restapi/pkg/httpe"
+	"github.com/Edbeer/restapi/pkg/logger"
 	"github.com/Edbeer/restapi/pkg/utils"
 
 	"github.com/google/uuid"
@@ -31,18 +32,20 @@ type AuthPsql interface {
 // Auth StorageRedis interface
 type AuthRedis interface {
 	GetByIDCtx(ctx context.Context, key string) (*entity.User, error)
+	SetUserCtx(ctx context.Context, key string, seconds int, user *entity.User) error
 }
 
 // Auth service
 type AuthService struct {
+	logger       logger.Logger
 	config       *config.Config
 	storagePsql  AuthPsql
 	storageRedis AuthRedis
 }
 
 // Auth service constructor
-func NewAuthService(config *config.Config, storagePsql AuthPsql, storageRedis AuthRedis) *AuthService {
-	return &AuthService{config: config, storagePsql: storagePsql, storageRedis: storageRedis}
+func NewAuthService(config *config.Config, storagePsql AuthPsql, storageRedis AuthRedis, logger logger.Logger) *AuthService {
+	return &AuthService{config: config, storagePsql: storagePsql, storageRedis: storageRedis, logger: logger}
 }
 
 // Register new user
@@ -112,6 +115,10 @@ func (a *AuthService) GetUserByID(ctx context.Context, userID uuid.UUID) (*entit
 	if err != nil {
 		return nil, err
 	}
+
+	if err := a.storageRedis.SetUserCtx(ctx, a.GenerateUserKey(userID.String()), cacheDuration, user); err != nil {
+		a.logger.Errorf("AuthService.GetByID.SetUserCtx: %v", err)
+	}
 	user.SanitizePassword()
 	return user, nil
 }
@@ -156,7 +163,7 @@ func (a *AuthService) Login(ctx context.Context, user *entity.User) (*entity.Use
 	}
 
 	return &entity.UserWithToken{
-		User: foundUser,
+		User:  foundUser,
 		Token: token,
 	}, nil
 }

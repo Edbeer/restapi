@@ -3,6 +3,7 @@ package redisrepo
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/go-redis/redis/v9"
@@ -29,4 +30,18 @@ func (s *AuthStorage) GetByIDCtx(ctx context.Context, key string) (*entity.User,
 		return nil, err
 	}
 	return user, nil
+}
+
+// Cache user with duration in seconds
+func (s *AuthStorage) SetUserCtx(ctx context.Context, key string, seconds int, user *entity.User) error {
+	userBytes, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+
+	if err := s.redis.Set(ctx, key, userBytes, time.Second*time.Duration(seconds)).Err(); err != nil {
+		return err
+	}
+
+	return nil
 }

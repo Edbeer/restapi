@@ -49,6 +49,7 @@ func (s *Server) Run() error {
 		psql := psql.NewStorage(s.psqlClient)
 		redis := redisrepo.NewStorage(s.redisClient)
 		service := service.NewService(service.Deps{
+			Logger:       s.logger,
 			Config:       s.config,
 			PsqlStorage:  psql,
 			RedisStorage: redis})
@@ -93,6 +94,7 @@ func (s *Server) Run() error {
 		psql := psql.NewStorage(s.psqlClient)
 		redis := redisrepo.NewStorage(s.redisClient)
 		service := service.NewService(service.Deps{
+			Logger:       s.logger,
 			Config:       s.config,
 			PsqlStorage:  psql,
 			RedisStorage: redis})
