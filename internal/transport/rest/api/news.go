@@ -18,7 +18,7 @@ type NewsService interface {
 	Create(ctx context.Context, news *entity.News) (*entity.News, error)
 	Update(ctx context.Context, news *entity.News) (*entity.News, error)
 	GetNews(ctx context.Context, pq *utils.PaginationQuery) (*entity.NewsList, error)
-	GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entity.News, error)
+	GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entity.NewsBase, error)
 	SearchNews(ctx context.Context, pq *utils.PaginationQuery, title string) (*entity.NewsList, error)
 	Delete(ctx context.Context, newsID uuid.UUID) error
 }

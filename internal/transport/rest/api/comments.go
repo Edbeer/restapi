@@ -18,7 +18,7 @@ type CommentsService interface {
 	Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
 	Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
 	GetAllByNewsID(ctx context.Context, newsID uuid.UUID, pq *utils.PaginationQuery) (*entity.CommentsList, error)
-	GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentResp, error)
+	GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentBase, error)
 	Delete(ctx context.Context, commentID uuid.UUID) error
 }
 

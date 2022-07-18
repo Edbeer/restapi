@@ -116,8 +116,8 @@ func (s *NewsStorage) Delete(ctx context.Context, newsID uuid.UUID) error {
 }
 
 // Get single news by id
-func (s *NewsStorage) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entity.News, error) {
-	var news entity.News
+func (s *NewsStorage) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entity.NewsBase, error) {
+	var news entity.NewsBase
 	if err := s.psql.QueryRow(ctx, getNewsByID, newsID).Scan(&news); err != nil {
 		return nil, httpe.NotFound
 	}

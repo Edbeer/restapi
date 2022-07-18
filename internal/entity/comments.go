@@ -17,8 +17,8 @@ type Comment struct {
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
-// Comment response
-type CommentResp struct {
+// Comment base response
+type CommentBase struct {
 	CommentID uuid.UUID `json:"comment_id" db:"comment_id" validate:"omitempty,uuid"`
 	AuthorID  uuid.UUID `json:"author_id" db:"author_id" validate:"required"`
 	Author    string    `json:"author" db:"author" validate:"required"`
@@ -28,12 +28,12 @@ type CommentResp struct {
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
-// Comment response list
+// Comment base list
 type CommentsList struct {
 	TotalCount int            `json:"total_count"`
 	TotalPages int            `json:"total_pages"`
 	Page       int            `json:"page"`
 	Size       int            `json:"size"`
 	HasMore    bool           `json:"has_more"`
-	Comments   []*CommentResp `json:"comments"`
+	Comments   []*CommentBase `json:"comments"`
 }

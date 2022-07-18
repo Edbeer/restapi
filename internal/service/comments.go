@@ -14,7 +14,7 @@ import (
 type CommentsStorage interface {
 	Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
 	Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
-	GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentResp, error)
+	GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentBase, error)
 	GetAllByNewsID(ctx context.Context, newsID uuid.UUID, pq *utils.PaginationQuery) (*entity.CommentsList, error)
 	Delete(ctx context.Context, commentID uuid.UUID) error
 }
@@ -57,7 +57,7 @@ func (c *CommentsService) Delete(ctx context.Context, commentID uuid.UUID) error
 }
 
 // Get comment by id
-func (c *CommentsService) GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentResp, error) {
+func (c *CommentsService) GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentBase, error) {
 	comment, err := c.commentsStorage.GetByID(ctx, commentID)
 	if err != nil {
 		return nil, err

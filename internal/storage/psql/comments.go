@@ -55,8 +55,8 @@ func (s *CommentsStorage) Delete(ctx context.Context, commentID uuid.UUID) error
 }
 
 // Get by id comment
-func (s *CommentsStorage) GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentResp, error) {
-	var comment entity.CommentResp
+func (s *CommentsStorage) GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentBase, error) {
+	var comment entity.CommentBase
 	if err := s.psql.QueryRow(ctx, getCommentByID, commentID).Scan(&comment); err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (s *CommentsStorage) GetAllByNewsID(ctx context.Context,
 			Page:       pq.GetPage(),
 			Size:       pq.GetSize(),
 			HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetPage()),
-			Comments:   make([]*entity.CommentResp, 0),
+			Comments:   make([]*entity.CommentBase, 0),
 		}, nil
 	}
 
@@ -92,9 +92,9 @@ func (s *CommentsStorage) GetAllByNewsID(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	var commentsList = make([]*entity.CommentResp, 0, pq.GetSize())
+	var commentsList = make([]*entity.CommentBase, 0, pq.GetSize())
 	for rows.Next() {
-		comment := &entity.CommentResp{}
+		comment := &entity.CommentBase{}
 		if err := rows.Scan(&comment); err != nil {
 			return nil, err
 		}
