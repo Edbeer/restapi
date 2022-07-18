@@ -30,6 +30,7 @@ type NewsPsql interface {
 type NewsRedis interface {
 	GetNewsByIDCtx(ctx context.Context, key string) (*entity.NewsBase, error)
 	SetNewsCtx(ctx context.Context, key string, seconds int, news *entity.NewsBase) error
+	DeleteNewsCtx(ctx context.Context, key string) error
 }
 
 //  News service
@@ -65,6 +66,9 @@ func (n *NewsService) Update(ctx context.Context, news *entity.News) (*entity.Ne
 	if err != nil {
 		return nil, err
 	}
+	if err := n.storageRedis.DeleteNewsCtx(ctx, news.NewsID.String()); err != nil {
+		n.logger.Errorf("NewsService.Update.DeleteNewsCtx: %v", err)
+	} 
 	return updatedNews, err
 }
 
@@ -72,6 +76,9 @@ func (n *NewsService) Update(ctx context.Context, news *entity.News) (*entity.Ne
 func (n *NewsService) Delete(ctx context.Context, newsID uuid.UUID) error {
 	if err := n.storagePsql.Delete(ctx, newsID); err != nil {
 		return err
+	}
+	if err := n.storageRedis.DeleteNewsCtx(ctx, newsID.String()); err != nil {
+		n.logger.Errorf("NewsService.Delete.DeleteNewsCtx: %v", err)
 	}
 	return nil
 }

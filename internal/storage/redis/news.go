@@ -47,3 +47,11 @@ func (n *NewsStorage) SetNewsCtx(ctx context.Context, key string, seconds int, n
 
 	return nil
 }
+
+// Delete news
+func (n *NewsStorage) DeleteNewsCtx(ctx context.Context, key string) error {
+	if err := n.redis.Del(ctx, key).Err(); err != nil {
+		return err
+	}
+	return nil
+}
