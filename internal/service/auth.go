@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
@@ -9,6 +10,11 @@ import (
 	"github.com/Edbeer/restapi/pkg/utils"
 
 	"github.com/google/uuid"
+)
+
+const (
+	basePrefix    = "api-auth:"
+	cacheDuration = 3600
 )
 
 // Auth StoragePsql interface
@@ -24,7 +30,7 @@ type AuthPsql interface {
 
 // Auth StorageRedis interface
 type AuthRedis interface {
-	Create() error
+	GetByIDCtx(ctx context.Context, key string) (*entity.User, error)
 }
 
 // Auth service
@@ -94,6 +100,14 @@ func (a *AuthService) Delete(ctx context.Context, userID uuid.UUID) error {
 
 // Get user by id
 func (a *AuthService) GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error) {
+	cachedUser, err := a.storageRedis.GetByIDCtx(ctx, a.GenerateUserKey(userID.String()))
+	if err != nil {
+		return nil, err
+	}
+	if cachedUser != nil {
+		return cachedUser, nil
+	}
+
 	user, err := a.storagePsql.GetUserByID(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -145,4 +159,8 @@ func (a *AuthService) Login(ctx context.Context, user *entity.User) (*entity.Use
 		User: foundUser,
 		Token: token,
 	}, nil
+}
+
+func (a *AuthService) GenerateUserKey(userID string) string {
+	return fmt.Sprintf("%s: %s", basePrefix, userID)
 }

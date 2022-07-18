@@ -1,6 +1,10 @@
 package redisrepo
 
 import (
+	"context"
+	"encoding/json"
+
+	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/go-redis/redis/v9"
 )
 
@@ -14,7 +18,15 @@ func NewAuthStorage(redis *redis.Client) *AuthStorage {
 	return &AuthStorage{redis: redis}
 }
 
-// Create user
-func (s *AuthStorage) Create() error {
-	return nil
+// Get user by id
+func (s *AuthStorage) GetByIDCtx(ctx context.Context, key string) (*entity.User, error) {
+	userBytes, err := s.redis.Get(ctx, key).Bytes()
+	if err != nil {
+		return nil, err
+	}
+	user := &entity.User{}
+	if err = json.Unmarshal(userBytes, user); err != nil {
+		return nil, err
+	}
+	return user, nil
 }
