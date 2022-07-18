@@ -38,17 +38,18 @@ func (a *AuthStorage) Register(ctx context.Context, user *entity.User) (*entity.
 }
 
 // Update user
-func (a *AuthStorage) Update(ctx context.Context, user *entity.User) error {
-	if _, err := a.psql.Exec(ctx, updateUserQuery,
+func (a *AuthStorage) Update(ctx context.Context, user *entity.User) (*entity.User, error) {
+	var u entity.User
+	if err := a.psql.QueryRow(ctx, updateUserQuery,
 		&user.FirstName, &user.LastName, &user.Email,
 		&user.Role, &user.Avatar, &user.PhoneNumber,
 		&user.Address, &user.City, &user.Country,
 		&user.Postcode, &user.UpdatedAt,
-	); err != nil {
-		return err
+	).Scan(&u); err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &u, nil
 }
 
 // Delete user

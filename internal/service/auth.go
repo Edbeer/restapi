@@ -21,7 +21,7 @@ const (
 // Auth StoragePsql interface
 type AuthPsql interface {
 	Register(ctx context.Context, user *entity.User) (*entity.User, error)
-	Update(ctx context.Context, user *entity.User) error
+	Update(ctx context.Context, user *entity.User) (*entity.User, error)
 	Delete(ctx context.Context, userID uuid.UUID) error
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error)
 	FindUsersByName(ctx context.Context, name string, pq *utils.PaginationQuery) (*entity.UsersList, error)
@@ -33,6 +33,7 @@ type AuthPsql interface {
 type AuthRedis interface {
 	GetByIDCtx(ctx context.Context, key string) (*entity.User, error)
 	SetUserCtx(ctx context.Context, key string, seconds int, user *entity.User) error
+	DeleteUserCtx(ctx context.Context, key string) error
 }
 
 // Auth service
@@ -76,27 +77,37 @@ func (a *AuthService) Register(ctx context.Context, user *entity.User) (*entity.
 }
 
 // Update user
-func (a *AuthService) Update(ctx context.Context, user *entity.User) error {
+func (a *AuthService) Update(ctx context.Context, user *entity.User) (*entity.User, error) {
 	if err := utils.ValidateStruct(ctx, user); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := user.PrepareUpdate(); err != nil {
-		return err
+		return nil, err
 	}
 
-	err := a.storagePsql.Update(ctx, user)
+	updatedUser, err := a.storagePsql.Update(ctx, user)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	user.SanitizePassword()
-	return nil
+	updatedUser.SanitizePassword()
+
+	if err = a.storageRedis.DeleteUserCtx(ctx, a.GenerateUserKey(user.ID.String())); err != nil {
+		a.logger.Errorf("AuthService.Update.DeleteUserCtx: %v", err)
+	}
+
+	updatedUser.SanitizePassword()
+
+	return updatedUser, nil
 }
 
 // Delete user
 func (a *AuthService) Delete(ctx context.Context, userID uuid.UUID) error {
 	if err := a.storagePsql.Delete(ctx, userID); err != nil {
 		return err
+	}
+	if err := a.storageRedis.DeleteUserCtx(ctx, a.GenerateUserKey(userID.String())); err != nil {
+		a.logger.Errorf("AuthService.Delete.DeleteUserCtx: %v", err)
 	}
 	return nil
 }

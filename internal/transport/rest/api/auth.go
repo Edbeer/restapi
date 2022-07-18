@@ -16,7 +16,7 @@ import (
 // Auth Service interface
 type AuthService interface {
 	Register(ctx context.Context, user *entity.User) (*entity.UserWithToken, error)
-	Update(ctx context.Context, user *entity.User) error
+	Update(ctx context.Context, user *entity.User) (*entity.User, error)
 	Delete(ctx context.Context, userID uuid.UUID) error
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error)
 	FindUsersByName(ctx context.Context, name string, pq *utils.PaginationQuery) (*entity.UsersList, error)
@@ -81,12 +81,12 @@ func (h *AuthHandler) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, httpe.BadRequest)
 		}
 
-		err = h.authService.Update(ctx, &u)
+		updatedUser, err := h.authService.Update(ctx, &u)
 		if err != nil {
 			return c.JSON(httpe.ErrorResponse(err))
 		}
 
-		return c.JSON(http.StatusCreated, "user updated")
+		return c.JSON(http.StatusOK, updatedUser)
 	}
 
 }

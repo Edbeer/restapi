@@ -45,3 +45,11 @@ func (s *AuthStorage) SetUserCtx(ctx context.Context, key string, seconds int, u
 
 	return nil
 }
+
+// Delete user by key
+func (s *AuthStorage) DeleteUserCtx(ctx context.Context, key string) error {
+	if err := s.redis.Del(ctx, key).Err(); err != nil {
+		return err
+	}
+	return nil
+}
