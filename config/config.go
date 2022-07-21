@@ -13,7 +13,8 @@ type Config struct {
 	Logger   Logger         `yaml:"logger"`
 	Postgres PostgresConfig `yaml:"postgres"`
 	Redis    RedisConfig    `yaml:"redis"`
-	Cookie   Cookie
+	Session  SessionConfig  `yaml:"session"`
+	Cookie   CookieConfig   `yaml:"cookie"`
 }
 
 // Server config struct
@@ -59,11 +60,18 @@ type Logger struct {
 	Level             string `yaml:"Level"`
 }
 
-type Cookie struct {
-	Name     string
-	MaxAge   int
-	Secure   bool
-	HTTPOnly bool
+// Session Config
+type SessionConfig struct {
+	Prefix string `yaml:"Prefix"`
+	Name   string `yaml:"Name"`
+	Expire int    `yaml:"Expire"`
+}
+
+type CookieConfig struct {
+	Name     string `yaml:"Name"`
+	MaxAge   int    `yaml:"MaxAge"`
+	Secure   bool   `yaml:"Secure"`
+	HTTPOnly bool   `yaml:"HTTPOnly"`
 }
 
 var (
