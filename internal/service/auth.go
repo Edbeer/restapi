@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
+	"net/http"
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
@@ -56,8 +58,13 @@ func NewAuthService(config *config.Config, storagePsql AuthPsql, storageRedis Au
 
 // Register new user
 func (a *AuthService) Register(ctx context.Context, user *entity.User) (*entity.UserWithToken, error) {
+	existsUser, err := a.storagePsql.FindUserByEmail(ctx, user)
+	if existsUser != nil || err == nil {
+		return nil, httpe.NewRestErrorWithMessage(http.StatusBadRequest, httpe.ErrEmailAlreadyExists, nil)
+	}
+
 	if err := user.PrepareCreate(); err != nil {
-		return nil, httpe.NewBadRequestError(err.Error())
+		return nil, httpe.NewBadRequestError(errors.Wrap(err, "AuthService.Register.PrepareCreate"))
 	}
 
 	if err := utils.ValidateStruct(ctx, user); err != nil {
@@ -72,7 +79,7 @@ func (a *AuthService) Register(ctx context.Context, user *entity.User) (*entity.
 
 	token, err := utils.GenerateJWTToken(createdUser, a.config)
 	if err != nil {
-		return nil, err
+		return nil, httpe.NewInternalServerError(errors.Wrap(err, "AuthService.Register.GenerateJWTToken"))
 	}
 
 	return &entity.UserWithToken{
@@ -88,7 +95,7 @@ func (a *AuthService) Update(ctx context.Context, user *entity.User) (*entity.Us
 	}
 
 	if err := user.PrepareUpdate(); err != nil {
-		return nil, err
+		return nil, httpe.NewBadRequestError(errors.Wrap(err, "AuthService.Update.PrepareCreate"))
 	}
 
 	updatedUser, err := a.storagePsql.Update(ctx, user)
@@ -121,7 +128,7 @@ func (a *AuthService) Delete(ctx context.Context, userID uuid.UUID) error {
 func (a *AuthService) GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error) {
 	cachedUser, err := a.storageRedis.GetByIDCtx(ctx, a.generateUserKey(userID.String()))
 	if err != nil {
-		return nil, err
+		a.logger.Errorf("AuthService.GetUserByID.GetByIDCtx")
 	}
 	if cachedUser != nil {
 		return cachedUser, nil
@@ -168,14 +175,14 @@ func (a *AuthService) Login(ctx context.Context, user *entity.User) (*entity.Use
 	}
 
 	if err := foundUser.ComparePassword(user.Password); err != nil {
-		return nil, err
+		return nil, httpe.NewUnauthorizedError(errors.Wrap(err, "AuthService.Login.ComparePassword"))
 	}
 
 	foundUser.SanitizePassword()
 
 	token, err := utils.GenerateJWTToken(foundUser, a.config)
 	if err != nil {
-		return nil, err
+		return nil, httpe.NewInternalServerError(errors.Wrap(err, "AuthService.Login.GenerateJWTToken"))
 	}
 
 	return &entity.UserWithToken{

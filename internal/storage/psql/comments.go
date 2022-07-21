@@ -7,6 +7,7 @@ import (
 	"github.com/Edbeer/restapi/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/pkg/errors"
 )
 
 // Comments storage
@@ -21,35 +22,35 @@ func NewCommentsStorage(psql *pgxpool.Pool) *CommentsStorage {
 
 // Create comments
 func (s *CommentsStorage) Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error) {
-	var c entity.Comment
+	c := &entity.Comment{}
 	if err := s.psql.QueryRow(ctx,
 		createComments,
 		&comments.AuthorID,
 		&comments.NewsID,
 		&comments.Message,
-	).Scan(&c); err != nil {
-		return nil, err
+	).Scan(c); err != nil {
+		return nil, errors.Wrap(err, "CommentsStoragePsql.Create.QueryRow")
 	}
-	return &c, nil
+	return c, nil
 }
 
 // Update comments
 func (s *CommentsStorage) Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error) {
-	var c entity.Comment
+	c := &entity.Comment{}
 	if err := s.psql.QueryRow(ctx,
 		updateComment,
 		&comments.Message,
 		&comments.CommentID,
-	).Scan(&c); err != nil {
-		return nil, err
+	).Scan(c); err != nil {
+		return nil, errors.Wrap(err, "CommentsStoragePsql.Update.QueryRow")
 	}
-	return &c, nil
+	return c, nil
 }
 
 // Delete comments
 func (s *CommentsStorage) Delete(ctx context.Context, commentID uuid.UUID) error {
 	if _, err := s.psql.Exec(ctx, deleteComment, commentID); err != nil {
-		return err
+		return errors.Wrap(err, "CommentsStoragePsql.Delete.Exec")
 	}
 	return nil
 }
@@ -58,7 +59,7 @@ func (s *CommentsStorage) Delete(ctx context.Context, commentID uuid.UUID) error
 func (s *CommentsStorage) GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentBase, error) {
 	var comment entity.CommentBase
 	if err := s.psql.QueryRow(ctx, getCommentByID, commentID).Scan(&comment); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "CommentsStoragePsql.GetByID.QueryRow")
 	}
 	return &comment, nil
 }
@@ -69,12 +70,12 @@ func (s *CommentsStorage) GetAllByNewsID(ctx context.Context,
 
 	tx, err := s.psql.Begin(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "CommentsStoragePsql.GetAllByNewsID.Begin")
 	}
 
 	var totalCount int
 	if err := tx.QueryRow(ctx, getCommentsCount, newsID).Scan(&totalCount); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "CommentsStoragePsql.GetAllByNewsID.QueryRow")
 	}
 
 	if totalCount == 0 {
@@ -90,19 +91,19 @@ func (s *CommentsStorage) GetAllByNewsID(ctx context.Context,
 
 	rows, err := tx.Query(ctx, getCommentsByNewsID, newsID, pq.GetDifference(), pq.GetLimit())
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "CommentsStoragePsql.GetAllByNewsID.Query")
 	}
 	var commentsList = make([]*entity.CommentBase, 0, pq.GetSize())
 	for rows.Next() {
 		comment := &entity.CommentBase{}
 		if err := rows.Scan(&comment); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "CommentsStoragePsql.GetAllByNewsID.Scan")
 		}
 		commentsList = append(commentsList, comment)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "CommentsStoragePsql.GetAllByNewsID.rows.Err")
 	}
 
 	return &entity.CommentsList{

@@ -46,13 +46,12 @@ func (h *AuthHandler) Register() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		var user entity.User
-		// Method POST
-		if err := c.Bind(&user); err != nil {
+		user := &entity.User{}
+		if err := c.Bind(user); err != nil {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		createdUser, err := h.authService.Register(ctx, &user)
+		createdUser, err := h.authService.Register(ctx, user)
 		if err != nil {
 			return c.JSON(httpe.ParseErrors(err).Status(), httpe.ParseErrors(err))
 		}
@@ -69,19 +68,19 @@ func (h *AuthHandler) Update() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		var u entity.User
+		
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, httpe.NewBadRequestError(err.Error()))
 		}
+		u := &entity.User{}
 		u.ID = uID
 
-		// Method PUT
-		if err := c.Bind(&u); err != nil {
+		if err := c.Bind(u); err != nil {
 			return c.JSON(http.StatusBadRequest, httpe.BadRequest)
 		}
 
-		updatedUser, err := h.authService.Update(ctx, &u)
+		updatedUser, err := h.authService.Update(ctx, u)
 		if err != nil {
 			return c.JSON(httpe.ErrorResponse(err))
 		}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/go-redis/redis/v9"
+	"github.com/pkg/errors"
 )
 
 // News storage
@@ -23,12 +24,12 @@ func NewNewsStorage(redis *redis.Client) *NewsStorage {
 func (n *NewsStorage) GetNewsByIDCtx(ctx context.Context, key string) (*entity.NewsBase, error) {
 	newsBytes, err := n.redis.Get(ctx, key).Bytes()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "NewsStorageRedis. GetNewsByIDCtx.Get")
 	}
 
 	news := &entity.NewsBase{}
 	if err := json.Unmarshal(newsBytes, news); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "NewsStorageRedis. GetNewsByIDCtx.Unarshal")
 	}
 
 	return news, nil
@@ -38,11 +39,11 @@ func (n *NewsStorage) GetNewsByIDCtx(ctx context.Context, key string) (*entity.N
 func (n *NewsStorage) SetNewsCtx(ctx context.Context, key string, seconds int, news *entity.NewsBase) error {
 	newsBytes, err := json.Marshal(news)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "NewsStorageRedis.SetNewsCtx.Marshal")
 	}
 
-	if err := n.redis.Set(ctx, key, newsBytes, time.Second * time.Duration(seconds)).Err(); err != nil {
-		return err
+	if err := n.redis.Set(ctx, key, newsBytes, time.Second*time.Duration(seconds)).Err(); err != nil {
+		return errors.Wrap(err, "NewsStorageRedis.SetNewsCtx.Set")
 	}
 
 	return nil
@@ -51,7 +52,7 @@ func (n *NewsStorage) SetNewsCtx(ctx context.Context, key string, seconds int, n
 // Delete news
 func (n *NewsStorage) DeleteNewsCtx(ctx context.Context, key string) error {
 	if err := n.redis.Del(ctx, key).Err(); err != nil {
-		return err
+		return errors.Wrap(err, "NewsStorageRedis.DeleteNewsCtx.Del")
 	}
 	return nil
 }

@@ -3,12 +3,15 @@ package service
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/Edbeer/restapi/pkg/httpe"
 	"github.com/Edbeer/restapi/pkg/logger"
 	"github.com/Edbeer/restapi/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -53,7 +56,17 @@ func NewNewsService(config *config.Config, storagePsql NewsPsql, redis NewsRedis
 
 // Create news
 func (n *NewsService) Create(ctx context.Context, news *entity.News) (*entity.News, error) {
-	news, err := n.storagePsql.Create(ctx, news)
+	user, err := utils.GetUserFromCtx(ctx)
+	if user == nil {
+		return nil, httpe.NewUnauthorizedError(errors.WithMessage(err, "NewsService.Create.GetUserFromCtx"))
+	}
+	news.AuthorID = user.ID
+
+	if err = utils.ValidateStruct(ctx, news); err != nil {
+		return nil, httpe.NewBadRequestError(errors.WithMessage(err, "NewsService.Create.ValidateStruct"))
+	}
+
+	news, err = n.storagePsql.Create(ctx, news)
 	if err != nil {
 		return nil, err
 	}
@@ -62,21 +75,40 @@ func (n *NewsService) Create(ctx context.Context, news *entity.News) (*entity.Ne
 
 // Update news items
 func (n *NewsService) Update(ctx context.Context, news *entity.News) (*entity.News, error) {
+	newsByID, err := n.storagePsql.GetNewsByID(ctx, news.NewsID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String(), n.logger); err != nil {
+		return nil, httpe.NewRestError(http.StatusForbidden, "Forbidden", errors.Wrap(err, "NewsService.Update.ValidateIsOwner"))
+	}
+
 	updatedNews, err := n.storagePsql.Update(ctx, news)
 	if err != nil {
 		return nil, err
 	}
 	if err := n.storageRedis.DeleteNewsCtx(ctx, news.NewsID.String()); err != nil {
 		n.logger.Errorf("NewsService.Update.DeleteNewsCtx: %v", err)
-	} 
+	}
 	return updatedNews, err
 }
 
 // Delete news by id
 func (n *NewsService) Delete(ctx context.Context, newsID uuid.UUID) error {
+	newsByID, err := n.storagePsql.GetNewsByID(ctx, newsID)
+	if err != nil {
+		return err
+	}
+
+	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String(), n.logger); err != nil {
+		return httpe.NewRestError(http.StatusForbidden, "Forbidden", errors.Wrap(err, "NewsService.Delete.ValidateIsOwner"))
+	}
+
 	if err := n.storagePsql.Delete(ctx, newsID); err != nil {
 		return err
 	}
+
 	if err := n.storageRedis.DeleteNewsCtx(ctx, newsID.String()); err != nil {
 		n.logger.Errorf("NewsService.Delete.DeleteNewsCtx: %v", err)
 	}
