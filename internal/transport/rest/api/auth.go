@@ -24,19 +24,26 @@ type AuthService interface {
 	Login(ctx context.Context, user *entity.User) (*entity.UserWithToken, error)
 }
 
+// SessionService interface
+type SessionService interface {
+	CreateSession(ctx context.Context, session *entity.Session, expire int) (string, error)
+}
+
 // AuthHandler
 type AuthHandler struct {
-	authService AuthService
-	config      *config.Config
-	logger      logger.Logger
+	authService    AuthService
+	sessionService SessionService
+	config         *config.Config
+	logger         logger.Logger
 }
 
 // AuthHandler constructor
-func NewAuthHandler(authService AuthService, config *config.Config, logger logger.Logger) *AuthHandler {
+func NewAuthHandler(authService AuthService, config *config.Config, logger logger.Logger, sessionService SessionService) *AuthHandler {
 	return &AuthHandler{
-		authService: authService, 
-		config: config,
-		logger: logger,
+		authService:    authService,
+		config:         config,
+		logger:         logger,
+		sessionService: sessionService,
 	}
 }
 
@@ -56,7 +63,14 @@ func (h *AuthHandler) Register() echo.HandlerFunc {
 			return c.JSON(httpe.ParseErrors(err).Status(), httpe.ParseErrors(err))
 		}
 
-		c.SetCookie(utils.ConfigureJWTCookie(h.config, createdUser.Token))
+		session, err := h.sessionService.CreateSession(ctx, &entity.Session{
+			UserID: createdUser.User.ID,
+		}, h.config.Session.Expire)
+		if err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+
+		c.SetCookie(utils.ConfigureSessionCookie(h.config, session))
 
 		return c.JSON(http.StatusCreated, createdUser)
 	}
@@ -68,7 +82,6 @@ func (h *AuthHandler) Update() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, httpe.NewBadRequestError(err.Error()))
@@ -191,7 +204,11 @@ func (h *AuthHandler) Login() echo.HandlerFunc {
 			return c.JSON(httpe.ErrorResponse(err))
 		}
 
-		c.SetCookie(utils.ConfigureJWTCookie(h.config, userWithToken.Token))
+		session, err := h.sessionService.CreateSession(ctx, &entity.Session{
+			UserID: userWithToken.User.ID,
+		}, h.config.Session.Expire)
+
+		c.SetCookie(utils.ConfigureSessionCookie(h.config, session))
 
 		return c.JSON(http.StatusOK, userWithToken)
 	}

@@ -23,6 +23,7 @@ func GetCtxWithReqID(c echo.Context) (context.Context, context.CancelFunc) {
 	return ctx, cancel
 }
 
+// Configure JWT cookie
 func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
 	return &http.Cookie{
 		Name:       cfg.Cookie.Name,
@@ -34,6 +35,20 @@ func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
 		Secure:     cfg.Cookie.Secure,
 		// it is better to keep jwtokens on httpOnly from XSS attacks
 		HttpOnly:   cfg.Cookie.HTTPOnly, // true
+		SameSite:   0,
+	}
+}
+
+// Configure Session Cookie
+func ConfigureSessionCookie(cfg *config.Config, session string) *http.Cookie {
+	return &http.Cookie{
+		Name: cfg.Session.Name,
+		Value: session,
+		Path: "/",
+		RawExpires: "",
+		MaxAge:     cfg.Session.Expire,
+		Secure:     cfg.Cookie.Secure,
+		HttpOnly:   cfg.Cookie.HTTPOnly,
 		SameSite:   0,
 	}
 }
