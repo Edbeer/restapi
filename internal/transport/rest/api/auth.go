@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/Edbeer/restapi/config"
@@ -24,21 +25,22 @@ type AuthService interface {
 	Login(ctx context.Context, user *entity.User) (*entity.UserWithToken, error)
 }
 
-// SessionService interface
-type SessionService interface {
+// AuthSessionService interface
+type AuthSessionService interface {
 	CreateSession(ctx context.Context, session *entity.Session, expire int) (string, error)
+	DeleteSessionByID(ctx context.Context, sessionID string) error
 }
 
 // AuthHandler
 type AuthHandler struct {
 	authService    AuthService
-	sessionService SessionService
+	sessionService AuthSessionService
 	config         *config.Config
 	logger         logger.Logger
 }
 
 // AuthHandler constructor
-func NewAuthHandler(authService AuthService, config *config.Config, logger logger.Logger, sessionService SessionService) *AuthHandler {
+func NewAuthHandler(authService AuthService, config *config.Config, logger logger.Logger, sessionService AuthSessionService) *AuthHandler {
 	return &AuthHandler{
 		authService:    authService,
 		config:         config,
@@ -217,13 +219,20 @@ func (h *AuthHandler) Login() echo.HandlerFunc {
 // Logout
 func (h *AuthHandler) Logout() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
 
-		c.SetCookie(&http.Cookie{
-			Name:   h.config.Cookie.Name,
-			Value:  "",
-			Path:   "/",
-			MaxAge: -1,
-		})
+		cookie, err := c.Cookie("session-id")
+		if err != nil {
+			if errors.Is(err, http.ErrNoCookie) {
+				return c.JSON(http.StatusUnauthorized, httpe.NewUnauthorizedError(err))
+			}
+			return c.JSON(http.StatusInternalServerError, httpe.NewInternalServerError(err))
+		}
+		if err = h.sessionService.DeleteSessionByID(ctx, cookie.Value); err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
+		utils.DeleteSessionCookie(c, h.config.Session.Name)
 
 		return c.NoContent(http.StatusOK)
 	}

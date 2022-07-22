@@ -53,6 +53,16 @@ func ConfigureSessionCookie(cfg *config.Config, session string) *http.Cookie {
 	}
 }
 
+// Delete session
+func DeleteSessionCookie(c echo.Context, sessionName string) {
+	c.SetCookie(&http.Cookie{
+		Name:   sessionName,
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+}
+
 func GetUserFromCtx(ctx context.Context) (*entity.User, error) {
 	user, ok := ctx.Value("user").(*entity.User)
 	if !ok {

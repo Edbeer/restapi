@@ -41,6 +41,29 @@ func (s *SessionStorage) CreateSession(ctx context.Context, session *entity.Sess
 	return sessionKey, nil
 }
 
+// Update session in redis
+func (s *SessionStorage) GetSessionByID(ctx context.Context, sessionID string) (*entity.Session, error) {
+	sessionBytes, err := s.redis.Get(ctx, sessionID).Bytes()
+	if err != nil {
+		return nil, errors.Wrap(err, "SessionStorage.GetSessionByID.Get")
+	}
+
+	session := &entity.Session{}
+	if err = json.Unmarshal(sessionBytes, session); err != nil {
+		return nil, errors.Wrap(err, "SessionStorage.GetSessionByID.Get") 
+	}
+
+	return session, nil
+}
+
+// Delete session by id
+func (s *SessionStorage) DeleteSessionByID(ctx context.Context, sessionID string) error {
+	if err := s.redis.Del(ctx, sessionID).Err(); err != nil {
+		return errors.Wrap(err, "SessionStorage.DeleteSession.Del")
+	}
+	return nil
+}
+
 func (s *SessionStorage) createSessionKey(sessionID string) string {
 	return fmt.Sprintf("%s: %s", s.config.Session.Prefix, sessionID)
 } 

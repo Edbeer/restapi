@@ -11,6 +11,8 @@ import (
 // Session redis storage interface
 type SessionStorage interface {
 	CreateSession(ctx context.Context, session *entity.Session, expire int) (string, error)
+	GetSessionByID(ctx context.Context, sessionID string) (*entity.Session, error)
+	DeleteSessionByID(ctx context.Context, sessionID string) error
 }
 
 // Session service
@@ -29,7 +31,18 @@ func NewSessionService(config *config.Config, sessionStorage SessionStorage, log
 	}
 }
 
+// Create session
 func (s *SessionService) CreateSession(ctx context.Context, session *entity.Session, expire int) (string, error) {
 	return s.sessionStorage.CreateSession(ctx, session, expire)
+}
+
+// Get session by id
+func (s *SessionService) GetSessionByID(ctx context.Context, sessionID string) (*entity.Session, error) {
+	return s.sessionStorage.GetSessionByID(ctx, sessionID)
+}
+
+// Delete session by id
+func (s *SessionService) DeleteSessionByID(ctx context.Context, sessionID string) error {
+	return s.sessionStorage.DeleteSessionByID(ctx, sessionID)
 }
 

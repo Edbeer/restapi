@@ -13,7 +13,7 @@ type Deps struct {
 	AuthService     AuthService
 	NewsService     NewsService
 	CommentsService CommentsService
-	SessionService 	SessionService
+	SessionService 	AuthSessionService
 	Config          *config.Config
 	Logger          logger.Logger
 }
