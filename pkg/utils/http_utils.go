@@ -16,10 +16,13 @@ func GetRequestID(c echo.Context) string {
 	return c.Response().Header().Get(echo.HeaderXRequestID)
 }
 
+// ReqIDCtxKey is a key used for the Request ID from context
+type ReqIDCtxKey struct{}
+
 // Get ctx with timeout and request id from echo context
 func GetCtxWithReqID(c echo.Context) (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 5*time.Second)
-	ctx = context.WithValue(ctx, "ReqID", GetRequestID(c))
+	ctx = context.WithValue(ctx, ReqIDCtxKey{}, GetRequestID(c))
 	return ctx, cancel
 }
 
@@ -63,8 +66,12 @@ func DeleteSessionCookie(c echo.Context, sessionName string) {
 	})
 }
 
+// UserCtxKey is a key used for the User object in the context
+type UserCtxKey struct{}
+
+// Get User from context
 func GetUserFromCtx(ctx context.Context) (*entity.User, error) {
-	user, ok := ctx.Value("user").(*entity.User)
+	user, ok := ctx.Value(UserCtxKey{}).(*entity.User)
 	if !ok {
 		return nil, httpe.Unauthorized
 	}

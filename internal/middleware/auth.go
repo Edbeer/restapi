@@ -15,6 +15,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// JWT way of auth using cookie or Authorization header
 func AuthJWTMiddleware(authService service.AuthService, config *config.Config) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {

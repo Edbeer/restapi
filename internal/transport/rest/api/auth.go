@@ -25,22 +25,23 @@ type AuthService interface {
 	Login(ctx context.Context, user *entity.User) (*entity.UserWithToken, error)
 }
 
-// AuthSessionService interface
-type AuthSessionService interface {
+// Session service interface
+type SessionService interface {
 	CreateSession(ctx context.Context, session *entity.Session, expire int) (string, error)
+	GetSessionByID(ctx context.Context, sessionID string) (*entity.Session, error)
 	DeleteSessionByID(ctx context.Context, sessionID string) error
 }
 
 // AuthHandler
 type AuthHandler struct {
 	authService    AuthService
-	sessionService AuthSessionService
+	sessionService SessionService
 	config         *config.Config
 	logger         logger.Logger
 }
 
 // AuthHandler constructor
-func NewAuthHandler(authService AuthService, config *config.Config, logger logger.Logger, sessionService AuthSessionService) *AuthHandler {
+func NewAuthHandler(authService AuthService, config *config.Config, logger logger.Logger, sessionService SessionService) *AuthHandler {
 	return &AuthHandler{
 		authService:    authService,
 		config:         config,
