@@ -27,6 +27,7 @@ type ServerConfig struct {
 	WriteTimeout      int    `yaml:"WriteTimeout"`
 	SSL               bool   `yaml:"SSL"`
 	CtxDefaultTimeout int    `yaml:"CtxDefaultTimeout"`
+	CSRF              bool   `yaml:"CSRF"`
 }
 
 // Postgresql config

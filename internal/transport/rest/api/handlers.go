@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/Edbeer/restapi/config"
 	middle "github.com/Edbeer/restapi/internal/middleware"
+	"github.com/Edbeer/restapi/pkg/csrf"
 	"github.com/Edbeer/restapi/pkg/logger"
 
 	"github.com/labstack/echo/v4"
@@ -43,13 +44,12 @@ func (h *Handlers) Init(e *echo.Echo) error {
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderXRequestID, csrf.CSRFHeader},
 	}))
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 5,
 	}))
 	// Request ID middleware generates a unique id for a request.
-	// echo.Use(middleware.CSRF())
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
 
