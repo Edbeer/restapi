@@ -77,3 +77,8 @@ func GetUserFromCtx(ctx context.Context) (*entity.User, error) {
 	}
 	return user, nil
 }
+
+// Get user IP address
+func GetIP(c echo.Context) string {
+	return c.Request().RemoteAddr
+}

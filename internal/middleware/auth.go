@@ -62,6 +62,7 @@ func (mw *MiddlewareManager) AuthSessionMiddleware(next echo.HandlerFunc) echo.H
 		mw.logger.Info(
 			"SessionMiddleware, RequestID: %s, UserID: %s, CookieSessionID: %s",
 			utils.GetRequestID(c),
+			utils.GetIP(c),
 			user.ID.String(),
 			sessionId,
 		)
