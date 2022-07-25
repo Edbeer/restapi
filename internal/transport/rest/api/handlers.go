@@ -53,12 +53,20 @@ func (h *Handlers) Init(e *echo.Echo) error {
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
 
-	h.initApi(e)
+	// Middleware Manager
+	mw := middle.NewMiddlewareManager(h.auth.sessionService, 
+		h.auth.authService, 
+		h.auth.config, 
+		[]string{"*"}, 
+		h.auth.logger,
+	)
+
+	h.initApi(e, mw)
 
 	return nil
 }
 
-func (h *Handlers) initApi(e *echo.Echo) {
+func (h *Handlers) initApi(e *echo.Echo, mw *middle.MiddlewareManager) {
 	api := e.Group("/api")
 	{
 		auth := api.Group("/auth")
@@ -69,29 +77,29 @@ func (h *Handlers) initApi(e *echo.Echo) {
 			auth.GET("/:user_id", h.auth.GetUserByID())
 			auth.GET("/find", h.auth.FindUsersByName())
 			auth.GET("/all", h.auth.GetUsers())
-			// auth.Use(middleware.AuthJWTMiddleware(*h.service.Auth, h.config))
-			auth.PUT("/:user_id", h.auth.Update(), middle.OwnerOrAdminMiddleware())
-			auth.DELETE("/:user_id", h.auth.Delete(), middle.RoleBasedAuthMiddleware([]string{"admin"}))
+			auth.Use(mw.AuthSessionMiddleware)
+			auth.PUT("/:user_id", h.auth.Update(), mw.OwnerOrAdminMiddleware())
+			auth.DELETE("/:user_id", h.auth.Delete(), mw.RoleBasedAuthMiddleware([]string{"admin"}))
 			auth.GET("/me", h.auth.GetMe())
 		}
 
 		news := api.Group("/news")
 		{
-			news.POST("/create", h.news.Create())
+			news.POST("/create", h.news.Create(), mw.AuthSessionMiddleware)
+			news.PUT("/:news_id", h.news.Update(), mw.AuthSessionMiddleware)
+			news.DELETE("/:news_id", h.news.Delete(), mw.AuthSessionMiddleware)
 			news.GET("/all", h.news.GetNews())
 			news.GET("/:news_id", h.news.GetNewsByID())
 			news.GET("/search", h.news.SearchNews())
-			news.PUT("/:news_id", h.news.Update())
-			news.DELETE("/:news_id", h.news.Delete())
 		}
 
 		comments := api.Group("/comments")
 		{
-			comments.POST("", h.comments.Create())
+			comments.POST("", h.comments.Create(), mw.AuthSessionMiddleware)
+			comments.PUT("/:comments_id", h.comments.Update(), mw.AuthSessionMiddleware)
+			comments.DELETE("/delete", h.comments.Delete(), mw.AuthSessionMiddleware)
 			comments.GET("/:comments_id", h.comments.GetByID())
 			comments.GET("/byNewsID/:news_id", h.comments.GetAllByNewsID())
-			comments.PUT("/:comments_id", h.comments.Update())
-			comments.DELETE("/delete", h.comments.Delete())
 		}
 
 	}

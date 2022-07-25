@@ -7,7 +7,7 @@ import (
 	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/Edbeer/restapi/pkg/logger"
 	"github.com/Edbeer/restapi/pkg/utils"
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 )
 
 // Session service interface
@@ -38,7 +38,7 @@ type MiddlewareManager struct {
 }
 
 // Middleware manager constructor
-func NewMiddleware(sessionService SessionService, authService AuthService, config *config.Config, origins []string, logger logger.Logger) *MiddlewareManager {
+func NewMiddlewareManager(sessionService SessionService, authService AuthService, config *config.Config, origins []string, logger logger.Logger) *MiddlewareManager {
 	return &MiddlewareManager{
 		sessionService: sessionService,
 		authService:    authService,
