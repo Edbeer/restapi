@@ -78,16 +78,17 @@ func (h *Handlers) initApi(e *echo.Echo, mw *middle.MiddlewareManager) {
 			auth.GET("/find", h.auth.FindUsersByName())
 			auth.GET("/all", h.auth.GetUsers())
 			auth.Use(mw.AuthSessionMiddleware)
-			auth.PUT("/:user_id", h.auth.Update(), mw.OwnerOrAdminMiddleware())
+			auth.GET("/token", h.auth.GetCSRFToken())
+			auth.PUT("/:user_id", h.auth.Update(), mw.OwnerOrAdminMiddleware(), mw.CSRF)
 			auth.DELETE("/:user_id", h.auth.Delete(), mw.RoleBasedAuthMiddleware([]string{"admin"}))
 			auth.GET("/me", h.auth.GetMe())
 		}
 
 		news := api.Group("/news")
 		{
-			news.POST("/create", h.news.Create(), mw.AuthSessionMiddleware)
-			news.PUT("/:news_id", h.news.Update(), mw.AuthSessionMiddleware)
-			news.DELETE("/:news_id", h.news.Delete(), mw.AuthSessionMiddleware)
+			news.POST("/create", h.news.Create(), mw.AuthSessionMiddleware, mw.CSRF)
+			news.PUT("/:news_id", h.news.Update(), mw.AuthSessionMiddleware, mw.CSRF)
+			news.DELETE("/:news_id", h.news.Delete(), mw.AuthSessionMiddleware, mw.CSRF)
 			news.GET("/all", h.news.GetNews())
 			news.GET("/:news_id", h.news.GetNewsByID())
 			news.GET("/search", h.news.SearchNews())
@@ -95,12 +96,11 @@ func (h *Handlers) initApi(e *echo.Echo, mw *middle.MiddlewareManager) {
 
 		comments := api.Group("/comments")
 		{
-			comments.POST("", h.comments.Create(), mw.AuthSessionMiddleware)
-			comments.PUT("/:comments_id", h.comments.Update(), mw.AuthSessionMiddleware)
-			comments.DELETE("/delete", h.comments.Delete(), mw.AuthSessionMiddleware)
+			comments.POST("", h.comments.Create(), mw.AuthSessionMiddleware, mw.CSRF)
+			comments.PUT("/:comments_id", h.comments.Update(), mw.AuthSessionMiddleware, mw.CSRF)
+			comments.DELETE("/delete", h.comments.Delete(), mw.AuthSessionMiddleware, mw.CSRF)
 			comments.GET("/:comments_id", h.comments.GetByID())
 			comments.GET("/byNewsID/:news_id", h.comments.GetAllByNewsID())
 		}
-
 	}
 }

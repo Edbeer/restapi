@@ -7,6 +7,7 @@ import (
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
+	"github.com/Edbeer/restapi/pkg/csrf"
 	"github.com/Edbeer/restapi/pkg/httpe"
 	"github.com/Edbeer/restapi/pkg/logger"
 	"github.com/Edbeer/restapi/pkg/utils"
@@ -248,5 +249,22 @@ func (h *AuthHandler) GetMe() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, user)
+	}
+}
+
+// Get CSRF token
+func (h *AuthHandler) GetCSRFToken() echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		sessionId, ok := c.Get("sid").(string)
+		if !ok {
+			httpe.NewUnauthorizedError(httpe.Unauthorized)
+		}
+
+		token := csrf.MakeToken(sessionId, h.logger)
+		c.Response().Header().Set(csrf.CSRFHeader, token)
+		c.Response().Header().Set("Access-Control-Expose-Headres", csrf.CSRFHeader)
+
+		return c.NoContent(http.StatusOK)
 	}
 }
