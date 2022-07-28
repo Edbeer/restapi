@@ -2,12 +2,14 @@ package api
 
 import (
 	"github.com/Edbeer/restapi/config"
+	"github.com/Edbeer/restapi/docs"
 	middle "github.com/Edbeer/restapi/internal/middleware"
 	"github.com/Edbeer/restapi/pkg/csrf"
 	"github.com/Edbeer/restapi/pkg/logger"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/swaggo/echo-swagger"
 )
 
 type Deps struct {
@@ -60,7 +62,9 @@ func (h *Handlers) Init(e *echo.Echo) error {
 		[]string{"*"}, 
 		h.auth.logger,
 	)
-
+	docs.SwaggerInfo.Title = "Go example restapi"
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	
 	h.initApi(e, mw)
 
 	return nil

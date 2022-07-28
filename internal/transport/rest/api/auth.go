@@ -51,7 +51,14 @@ func NewAuthHandler(authService AuthService, config *config.Config, logger logge
 	}
 }
 
-// Register new user
+// Register godoc
+// @Summary Register new user
+// @Description register new user, returns user and token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Success 201 {object} entity.User
+// @Router /auth/register [post]
 func (h *AuthHandler) Register() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -80,7 +87,15 @@ func (h *AuthHandler) Register() echo.HandlerFunc {
 	}
 }
 
-// Update User
+// Update godoc
+// @Summary Update user
+// @Description update existing user
+// @Tags Auth
+// @Accept json
+// @Param id path int true "user_id"
+// @Produce json
+// @Success 200 {object} entity.User
+// @Router /auth/{id} [put]
 func (h *AuthHandler) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -107,7 +122,16 @@ func (h *AuthHandler) Update() echo.HandlerFunc {
 
 }
 
-// Delete User
+// Delete godoc
+// @Summary Delete user account
+// @Description some description
+// @Tags Auth
+// @Accept json
+// @Param id path int true "user_id"
+// @Produce json
+// @Success 200 {string} string	"ok"
+// @Failure 500 {object} httpe.RestError
+// @Router /auth/{id} [delete]
 func (h *AuthHandler) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -126,7 +150,16 @@ func (h *AuthHandler) Delete() echo.HandlerFunc {
 	}
 }
 
-// Get user by id
+// GetUserByID godoc
+// @Summary get user by id
+// @Description get string by ID
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Param id path int true "user_id"
+// @Success 200 {object} entity.User
+// @Failure 500 {object} httpe.RestError
+// @Router /auth/{id} [get]
 func (h *AuthHandler) GetUserByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -146,7 +179,16 @@ func (h *AuthHandler) GetUserByID() echo.HandlerFunc {
 	}
 }
 
-// Find users by name
+// FindUsersByName godoc
+// @Summary Find by name
+// @Description Find user by name
+// @Tags Auth
+// @Accept json
+// @Param name query string false "username" Format(username)
+// @Produce json
+// @Success 200 {object} entity.UsersList
+// @Failure 500 {object} httpe.RestError
+// @Router /auth/find [get]
 func (h *AuthHandler) FindUsersByName() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -170,6 +212,18 @@ func (h *AuthHandler) FindUsersByName() echo.HandlerFunc {
 	}
 }
 
+// GetUsers godoc
+// @Summary Get users
+// @Description Get the list of all users
+// @Tags Auth
+// @Accept json
+// @Param page query int false "page number" Format(page)
+// @Param size query int false "number of elements per page" Format(size)
+// @Param orderBy query int false "filter name" Format(orderBy)
+// @Produce json
+// @Success 200 {object} entity.UsersList
+// @Failure 500 {object} httpe.RestError
+// @Router /auth/all [get]
 func (h *AuthHandler) GetUsers() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -189,7 +243,14 @@ func (h *AuthHandler) GetUsers() echo.HandlerFunc {
 	}
 }
 
-// Login
+// Login godoc
+// @Summary Login new user
+// @Description login user, returns user and set session
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} entity.User
+// @Router /auth/login [post]
 func (h *AuthHandler) Login() echo.HandlerFunc {
 	type Login struct {
 		Email    string `json:"email" db:"email" validate:"omitempty,lte=60,email"`
@@ -218,7 +279,14 @@ func (h *AuthHandler) Login() echo.HandlerFunc {
 	}
 }
 
-// Logout
+// Logout godoc
+// @Summary Logout user
+// @Description logout user removing session
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Success 200 {string} string	"ok"
+// @Router /auth/logout [post]
 func (h *AuthHandler) Logout() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -240,7 +308,15 @@ func (h *AuthHandler) Logout() echo.HandlerFunc {
 	}
 }
 
-// Load current user from ctx with auth middleware
+// GetMe godoc
+// @Summary Get user by id
+// @Description Get current user by id
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} entity.User
+// @Failure 500 {object} httpe.RestError
+// @Router /auth/me [get]
 func (h *AuthHandler) GetMe() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := c.Get("user").(*entity.User)
@@ -252,7 +328,15 @@ func (h *AuthHandler) GetMe() echo.HandlerFunc {
 	}
 }
 
-// Get CSRF token
+// GetCSRFToken godoc
+// @Summary Get CSRF token
+// @Description Get CSRF token, required auth session cookie
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Success 200 {string} string "Ok"
+// @Failure 500 {object} httpe.RestError
+// @Router /auth/token [get]
 func (h *AuthHandler) GetCSRFToken() echo.HandlerFunc {
 	return func(c echo.Context) error {
 

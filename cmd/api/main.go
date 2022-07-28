@@ -8,6 +8,12 @@ import (
 	"github.com/Edbeer/restapi/pkg/logger"
 )
 
+// @title           restapi
+// @version         1.0
+// @description     This is an example of an implementation RESTApi
+
+// @BasePath /api/
+
 func main() {
 	cfg := config.GetConfig()
 	logger := logger.NewApiLogger(cfg)

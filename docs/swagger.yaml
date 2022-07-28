@@ -1,0 +1,657 @@
+basePath: /api/
+definitions:
+  entity.Comment:
+    properties:
+      author_id:
+        type: string
+      comment_id:
+        type: string
+      created_at:
+        type: string
+      likes:
+        type: integer
+      message:
+        minLength: 5
+        type: string
+      news_id:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - author_id
+    - message
+    - news_id
+    type: object
+  entity.CommentBase:
+    properties:
+      author:
+        type: string
+      author_id:
+        type: string
+      avatar_url:
+        type: string
+      comment_id:
+        type: string
+      likes:
+        type: integer
+      message:
+        minLength: 5
+        type: string
+      updated_at:
+        type: string
+    required:
+    - author
+    - author_id
+    - message
+    type: object
+  entity.CommentsList:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/entity.CommentBase'
+        type: array
+      has_more:
+        type: boolean
+      page:
+        type: integer
+      size:
+        type: integer
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  entity.News:
+    properties:
+      author_id:
+        type: string
+      category:
+        maxLength: 10
+        type: string
+      content:
+        minLength: 20
+        type: string
+      created_at:
+        type: string
+      image_url:
+        maxLength: 512
+        type: string
+      news_id:
+        type: string
+      title:
+        minLength: 10
+        type: string
+      updated_at:
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  entity.NewsList:
+    properties:
+      has_more:
+        type: boolean
+      news:
+        items:
+          $ref: '#/definitions/entity.News'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  entity.User:
+    properties:
+      address:
+        maxLength: 250
+        type: string
+      avatar:
+        type: string
+      balance:
+        type: number
+      city:
+        maxLength: 24
+        type: string
+      country:
+        maxLength: 24
+        type: string
+      created_at:
+        type: string
+      email:
+        maxLength: 60
+        type: string
+      first_name:
+        maxLength: 30
+        type: string
+      last_name:
+        maxLength: 30
+        type: string
+      phone_number:
+        maxLength: 20
+        type: string
+      postcode:
+        maximum: 10
+        type: integer
+      role:
+        maxLength: 10
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    required:
+    - first_name
+    - last_name
+    type: object
+  entity.UsersList:
+    properties:
+      has_more:
+        type: boolean
+      page:
+        type: integer
+      size:
+        type: integer
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/entity.User'
+        type: array
+    type: object
+  httpe.RestError:
+    properties:
+      error:
+        type: string
+      status:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: This is an example of an implementation RESTApi
+  title: restapi
+  version: "1.0"
+paths:
+  /auth/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: some description
+      parameters:
+      - description: user_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpe.RestError'
+      summary: Delete user account
+      tags:
+      - Auth
+    get:
+      consumes:
+      - application/json
+      description: get string by ID
+      parameters:
+      - description: user_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpe.RestError'
+      summary: get user by id
+      tags:
+      - Auth
+    put:
+      consumes:
+      - application/json
+      description: update existing user
+      parameters:
+      - description: user_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+      summary: Update user
+      tags:
+      - Auth
+  /auth/all:
+    get:
+      consumes:
+      - application/json
+      description: Get the list of all users
+      parameters:
+      - description: page number
+        format: page
+        in: query
+        name: page
+        type: integer
+      - description: number of elements per page
+        format: size
+        in: query
+        name: size
+        type: integer
+      - description: filter name
+        format: orderBy
+        in: query
+        name: orderBy
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UsersList'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpe.RestError'
+      summary: Get users
+      tags:
+      - Auth
+  /auth/find:
+    get:
+      consumes:
+      - application/json
+      description: Find user by name
+      parameters:
+      - description: username
+        format: username
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UsersList'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpe.RestError'
+      summary: Find by name
+      tags:
+      - Auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: login user, returns user and set session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+      summary: Login new user
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: logout user removing session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: Logout user
+      tags:
+      - Auth
+  /auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Get current user by id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpe.RestError'
+      summary: Get user by id
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: register new user, returns user and token
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.User'
+      summary: Register new user
+      tags:
+      - Auth
+  /auth/token:
+    get:
+      consumes:
+      - application/json
+      description: Get CSRF token, required auth session cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Ok
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpe.RestError'
+      summary: Get CSRF token
+      tags:
+      - Auth
+  /comments:
+    post:
+      consumes:
+      - application/json
+      description: create new comment
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create new comment
+      tags:
+      - Comments
+  /comments/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete comment
+      parameters:
+      - description: comment_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Delete comment
+      tags:
+      - Comments
+    get:
+      consumes:
+      - application/json
+      description: Get comment by id
+      parameters:
+      - description: comment_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get comment
+      tags:
+      - Comments
+    put:
+      consumes:
+      - application/json
+      description: update new comment
+      parameters:
+      - description: comment_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update comment
+      tags:
+      - Comments
+  /comments/byNewsId/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all comment by news id
+      parameters:
+      - description: news_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: page number
+        format: page
+        in: query
+        name: page
+        type: integer
+      - description: number of elements per page
+        format: size
+        in: query
+        name: size
+        type: integer
+      - description: filter name
+        format: orderBy
+        in: query
+        name: orderBy
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.CommentsList'
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get comments by news
+      tags:
+      - Comments
+  /news:
+    get:
+      consumes:
+      - application/json
+      description: Get all news with pagination
+      parameters:
+      - description: page number
+        format: page
+        in: query
+        name: page
+        type: integer
+      - description: number of elements per page
+        format: size
+        in: query
+        name: size
+        type: integer
+      - description: filter name
+        format: orderBy
+        in: query
+        name: orderBy
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.NewsList'
+      summary: Get all news
+      tags:
+      - News
+  /news/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete by id news handler
+      parameters:
+      - description: news_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: Delete news
+      tags:
+      - News
+    get:
+      consumes:
+      - application/json
+      description: Get by id news handler
+      parameters:
+      - description: news_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.News'
+      summary: Get by id news
+      tags:
+      - News
+    put:
+      consumes:
+      - application/json
+      description: Update news handler
+      parameters:
+      - description: news_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.News'
+      summary: Update news
+      tags:
+      - News
+  /news/create:
+    post:
+      consumes:
+      - application/json
+      description: Create news handler
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.News'
+      summary: Create news
+      tags:
+      - News
+  /news/search:
+    get:
+      consumes:
+      - application/json
+      description: Search news by title
+      parameters:
+      - description: page number
+        format: page
+        in: query
+        name: page
+        type: integer
+      - description: number of elements per page
+        format: size
+        in: query
+        name: size
+        type: integer
+      - description: filter name
+        format: orderBy
+        in: query
+        name: orderBy
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.NewsList'
+      summary: Search by title
+      tags:
+      - News
+swagger: "2.0"

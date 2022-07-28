@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/Edbeer/restapi/config"
@@ -76,7 +77,7 @@ func (s *Server) Run() error {
 
 		// Graceful shutdown
 		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt)
+		signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 		<-quit
 
@@ -125,7 +126,7 @@ func (s *Server) Run() error {
 
 		// Graceful shutdown
 		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt)
+		signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 		<-quit
 

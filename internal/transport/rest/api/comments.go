@@ -38,7 +38,15 @@ func NewCommentsHandler(commentsService CommentsService, config *config.Config, 
 	}
 }
 
-// Create Comments
+// Create godoc
+// @Summary Create new comment
+// @Description create new comment
+// @Tags Comments
+// @Accept  json
+// @Produce  json
+// @Success 201 {object} entity.Comment
+// @Failure 500 {object} httpe.RestErr
+// @Router /comments [post]
 func (h *CommentsHandler) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -60,7 +68,16 @@ func (h *CommentsHandler) Create() echo.HandlerFunc {
 	}
 }
 
-// Update comments
+// Update godoc
+// @Summary Update comment
+// @Description update new comment
+// @Tags Comments
+// @Accept  json
+// @Produce  json
+// @Param id path int true "comment_id"
+// @Success 200 {object} entity.Comment
+// @Failure 500 {object} httpe.RestErr
+// @Router /comments/{id} [put]
 func (h *CommentsHandler) Update() echo.HandlerFunc {
 	type UpdatedComment struct {
 		Message string `json:"message" db:"message" validate:"required,gte=0"`
@@ -90,7 +107,16 @@ func (h *CommentsHandler) Update() echo.HandlerFunc {
 	}
 }
 
-// Delete comments
+// Delete godoc
+// @Summary Delete comment
+// @Description delete comment
+// @Tags Comments
+// @Accept  json
+// @Produce  json
+// @Param id path int true "comment_id"
+// @Success 200 {string} string	"ok"
+// @Failure 500 {object} httpe.RestErr
+// @Router /comments/{id} [delete]
 func (h *CommentsHandler) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -109,7 +135,16 @@ func (h *CommentsHandler) Delete() echo.HandlerFunc {
 	}
 }
 
-// Get comment by id
+// GetByID godoc
+// @Summary Get comment
+// @Description Get comment by id
+// @Tags Comments
+// @Accept  json
+// @Produce  json
+// @Param id path int true "comment_id"
+// @Success 200 {object} entity.Comment
+// @Failure 500 {object} httpe.RestErr
+// @Router /comments/{id} [get]
 func (h *CommentsHandler) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -129,7 +164,19 @@ func (h *CommentsHandler) GetByID() echo.HandlerFunc {
 	}
 }
 
-// Get comments by news id
+// GetAllByNewsID godoc
+// @Summary Get comments by news
+// @Description Get all comment by news id
+// @Tags Comments
+// @Accept  json
+// @Produce  json
+// @Param id path int true "news_id"
+// @Param page query int false "page number" Format(page)
+// @Param size query int false "number of elements per page" Format(size)
+// @Param orderBy query int false "filter name" Format(orderBy)
+// @Success 200 {object} entity.CommentsList
+// @Failure 500 {object} httpe.RestErr
+// @Router /comments/byNewsId/{id} [get]
 func (h *CommentsHandler) GetAllByNewsID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
