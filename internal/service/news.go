@@ -25,7 +25,7 @@ type NewsPsql interface {
 	Update(ctx context.Context, news *entity.News) (*entity.News, error)
 	GetNews(ctx context.Context, pq *utils.PaginationQuery) (*entity.NewsList, error)
 	GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entity.NewsBase, error)
-	SearchNews(ctx context.Context, pq *utils.PaginationQuery, title string) (*entity.NewsList, error)
+	SearchNews(ctx context.Context, title string, pq *utils.PaginationQuery) (*entity.NewsList, error)
 	Delete(ctx context.Context, newsID uuid.UUID) error
 }
 
@@ -148,7 +148,7 @@ func (n *NewsService) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entit
 
 // Find news by title
 func (n *NewsService) SearchNews(ctx context.Context, pq *utils.PaginationQuery, title string) (*entity.NewsList, error) {
-	news, err := n.storagePsql.SearchNews(ctx, pq, title)
+	news, err := n.storagePsql.SearchNews(ctx, title, pq)
 	if err != nil {
 		return nil, err
 	}

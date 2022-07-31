@@ -15,20 +15,20 @@ import (
 	"github.com/Edbeer/restapi/internal/transport/rest/api"
 	"github.com/Edbeer/restapi/pkg/logger"
 	"github.com/go-redis/redis/v9"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
 	echo        *echo.Echo
 	config      *config.Config
-	psqlClient  *pgxpool.Pool
+	psqlClient  *sqlx.DB
 	redisClient *redis.Client
 	logger      logger.Logger
 }
 
 // New server constructor
-func NewServer(config *config.Config, psqlClient *pgxpool.Pool, redisClient *redis.Client, logger logger.Logger) *Server {
+func NewServer(config *config.Config, psqlClient *sqlx.DB, redisClient *redis.Client, logger logger.Logger) *Server {
 	return &Server{
 		echo:        echo.New(),
 		psqlClient:  psqlClient,

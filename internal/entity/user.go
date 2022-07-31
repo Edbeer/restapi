@@ -23,7 +23,7 @@ type User struct {
 	FirstName   string    `json:"first_name" db:"first_name" redis:"first_name" validate:"required,lte=30"`
 	LastName    string    `json:"last_name" db:"last_name" redis:"last_name" validate:"required,lte=30"`
 	Email       string    `json:"email" db:"email" redis:"email" validate:"omitempty,lte=60,email"`
-	Password    string    `json:"-" db:"password" redis:"password" validate:"required,gte=6"`
+	Password    string    `json:"password,omitempty" db:"password" redis:"password" validate:"required,gte=6"`
 	Role        *string   `json:"role" db:"role" redis:"role" validate:"omitempty,lte=10"`
 	Avatar      *string   `json:"avatar" db:"avatar" redis:"avatar"`
 	PhoneNumber *string   `json:"phone_number" db:"phone_number" redis:"phone_number" validate:"omitempty,lte=20"`
