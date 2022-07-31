@@ -16,6 +16,7 @@ postgres:
   PostgresqlPassword: postgres
   PostgresqlDbname: auth_db
   PostgresqlSSLMode: false
+  PgDriver: pgx
 
 redis:
   RedisAddr: localhost:6379

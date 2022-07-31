@@ -20,11 +20,11 @@ func main() {
 	logger.InitLogger()
 
 	// postgresql
-	psqlClient, err := postgres.NewPsqlClient(cfg)
+	psqlClient, err := postgres.NewPsqlDB(cfg)
 	if err != nil {
 		logger.Fatalf("Postgresql init: %s", err)
 	} else {
-		logger.Infof("Postgres connected, Status: %#v", psqlClient.Stat())
+		logger.Infof("Postgres connected, Status: %#v", psqlClient.Stats())
 	}
 	defer psqlClient.Close()
 

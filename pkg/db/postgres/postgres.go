@@ -1,39 +1,43 @@
 package postgres
 
 import (
-	"context"
 	"fmt"
+	"time"
 
 	"github.com/Edbeer/restapi/config"
-	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgconn"
+	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/jmoiron/sqlx"
 )
 
-type Client interface {
-	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
-	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
-	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
-	Begin(ctx context.Context) (pgx.Tx, error)
-}
+const (
+	maxOpenConns    = 60
+	connMaxLifetime = 120
+	maxIdleConns    = 30
+	connMaxIdleTime = 20
+)
 
-func NewPsqlClient(c *config.Config) (*pgxpool.Pool, error) {
-	dataSourceName := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
-		c.Postgres.PostgresqlUser,
-		c.Postgres.PostgresqlPassword,
+// Return new Postgresql db instance
+func NewPsqlDB(c *config.Config) (*sqlx.DB, error) {
+	dataSourceName := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
 		c.Postgres.PostgresqlHost,
 		c.Postgres.PostgresqlPort,
+		c.Postgres.PostgresqlUser,
 		c.Postgres.PostgresqlDbname,
+		c.Postgres.PostgresqlPassword,
 	)
 
-	pool, err := pgxpool.Connect(context.Background(), dataSourceName)
+	db, err := sqlx.Connect(c.Postgres.PgDriver, dataSourceName)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = pool.Ping(context.Background()); err != nil {
+	db.SetMaxOpenConns(maxOpenConns)
+	db.SetConnMaxLifetime(connMaxLifetime * time.Second)
+	db.SetMaxIdleConns(maxIdleConns)
+	db.SetConnMaxIdleTime(connMaxIdleTime * time.Second)
+	if err = db.Ping(); err != nil {
 		return nil, err
 	}
 
-	return pool, nil
+	return db, nil
 }
