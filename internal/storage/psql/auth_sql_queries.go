@@ -1,14 +1,7 @@
 package psql
 
 const (
-	createUserQuery = `INSERT INTO users 
-				(first_name, last_name, 
-				email, password, role, avatar, 
-				phone_number, address, city, country, 
-				postcode, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, 
-				$7, $8, $9, $10, $11, now(), now()) 
-			RETURNING *`
+	createUserQuery = `INSERT INTO users (first_name, last_name, email, password, role, avatar, phone_number, address, city, country, postcode, created_at, updated_at) VALUES ($1, $2, $3, $4, COALESCE(NULLIF($5, ''), 'user'), $6, $7, $8, $9, $10, $11, now(), now()) RETURNING *`
 
 	updateUserQuery = `UPDATE users 
 					SET first_name = COALESCE(NULLIF($1, ''), first_name),
@@ -22,7 +15,7 @@ const (
 						country = COALESCE(NULLIF($9, ''), country),
 						postcode = COALESCE(NULLIF($10, 0), postcode),
 						updated_at = now()
-					WHERE user_id = $12
+					WHERE user_id = $11
 					RETURNING *`
 
 	deleteUserQuery = `DELETE FROM users WHERE user_id = $1`
@@ -59,7 +52,7 @@ const (
 					WHERE first_name ILIKE '%' || $1 || '%' 
 						or last_name ILIKE '%' || $1 || '%'`
 
-	findUserByEmail = `SELECT irst_name, last_name, 
+	findUserByEmail = `SELECT first_name, last_name, 
 						email, password, role, avatar, 
 						phone_number, address, city, country, 
 						postcode, created_at, updated_at

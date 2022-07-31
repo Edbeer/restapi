@@ -7,46 +7,43 @@ import (
 	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/Edbeer/restapi/pkg/utils"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 )
 
 // Auth Storage
 type AuthStorage struct {
-	psql *pgxpool.Pool
+	psql PgxClient
 }
 
 // Auth Storage constructor
-func NewAuthStorage(psql *pgxpool.Pool) *AuthStorage {
+func NewAuthStorage(psql PgxClient) *AuthStorage {
 	return &AuthStorage{psql: psql}
 }
 
 // Register user
 func (a *AuthStorage) Register(ctx context.Context, user *entity.User) (*entity.User, error) {
 	u := &entity.User{}
-	if err := a.psql.QueryRow(ctx, createUserQuery,
+	if err := a.psql.QueryRowxContext(ctx, createUserQuery,
 		&user.FirstName, &user.LastName, &user.Email,
 		&user.Password, &user.Role, &user.Avatar,
 		&user.PhoneNumber, &user.Address, &user.City,
-		&user.Country, &user.Postcode, &user.CreatedAt,
-		&user.UpdatedAt,
-	).Scan(u); err != nil {
-		return nil, errors.Wrap(err, "AuthStoragePsql.Register.QueryRow")
+		&user.Country, &user.Postcode,
+	).StructScan(u); err != nil {
+		return nil, errors.Wrap(err, "AuthStoragePsql.Register.StructScan")
 	}
-
 	return u, nil
 }
 
 // Update user
 func (a *AuthStorage) Update(ctx context.Context, user *entity.User) (*entity.User, error) {
 	u := &entity.User{}
-	if err := a.psql.QueryRow(ctx, updateUserQuery,
+	if err := a.psql.GetContext(ctx, u, updateUserQuery,
 		&user.FirstName, &user.LastName, &user.Email,
 		&user.Role, &user.Avatar, &user.PhoneNumber,
 		&user.Address, &user.City, &user.Country,
-		&user.Postcode, &user.UpdatedAt,
-	).Scan(u); err != nil {
-		return nil, errors.Wrap(err, "AuthStoragePsql.Update.QueryRow")
+		&user.Postcode, &user.ID,
+	); err != nil {
+		return nil, errors.Wrap(err, "AuthStoragePsql.Update.GetContext")
 	}
 
 	return u, nil
@@ -54,8 +51,18 @@ func (a *AuthStorage) Update(ctx context.Context, user *entity.User) (*entity.Us
 
 // Delete user
 func (a *AuthStorage) Delete(ctx context.Context, userID uuid.UUID) error {
-	if _, err := a.psql.Exec(ctx, deleteUserQuery, userID); err != nil {
-		return errors.Wrap(err, "AuthStoragePsql.Delite.Exec")
+
+	result, err := a.psql.ExecContext(ctx, deleteUserQuery, userID)
+	if err != nil {
+		return errors.Wrap(err, "AuthStoragePsql.Delete.Context")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return errors.Wrap(err, "AuthStoragePsql.Delete.RowsAffected")
+	}
+	if rowsAffected == 0 {
+		return errors.Wrap(sql.ErrNoRows, "AuthStoragePsql.Delete.rowsAffected")
 	}
 
 	return nil
@@ -64,8 +71,8 @@ func (a *AuthStorage) Delete(ctx context.Context, userID uuid.UUID) error {
 // Get user by id
 func (a *AuthStorage) GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.User, error) {
 	u := &entity.User{}
-	if err := a.psql.QueryRow(ctx, getUserByID, userID).Scan(u); err == sql.ErrNoRows {
-		return nil, errors.Wrap(err, "AuthStoragePsql.GetUserByID.QueryRow")
+	if err := a.psql.QueryRowxContext(ctx, getUserByID, userID).StructScan(u); err != nil {
+		return nil, errors.Wrap(err, "AuthStoragePsql.GetUserByID.StructScan")
 	}
 
 	return u, nil
@@ -74,18 +81,10 @@ func (a *AuthStorage) GetUserByID(ctx context.Context, userID uuid.UUID) (*entit
 // Find users by name
 func (a *AuthStorage) FindUsersByName(ctx context.Context,
 	name string, pq *utils.PaginationQuery) (*entity.UsersList, error) {
-	// Start a transaction to ensure user count
-	tx, err := a.psql.Begin(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "AuthStoragePsql.FindUsersByName.Begin")
-
-	}
-	defer tx.Rollback(ctx)
 
 	var totalCount int
-	err = tx.QueryRow(ctx, getTotalCount).Scan(&totalCount)
-	if err != nil {
-		return nil, errors.Wrap(err, "AuthStoragePsql.FindUsersByName.QueryRow")
+	if err := a.psql.GetContext(ctx, &totalCount, getTotalCount, name); err != nil {
+		return nil, errors.Wrap(err, "AuthStoragePsql.FindUsersByName.GetContext")
 	}
 
 	if totalCount == 0 {
@@ -99,17 +98,17 @@ func (a *AuthStorage) FindUsersByName(ctx context.Context,
 		}, nil
 	}
 
-	rows, err := tx.Query(ctx, findUsersByName, name)
+	rows, err := a.psql.QueryxContext(ctx, findUsersByName, name, pq.GetDifference(), pq.GetLimit())
 	if err != nil {
-		return nil, errors.Wrap(err, "AuthStoragePsql.FindUsersByName.Query")
+		return nil, errors.Wrap(err, "AuthStoragePsql.FindUsersByName.QueryxContext")
 	}
 	defer rows.Close()
 
 	users := make([]*entity.User, 0, pq.GetSize())
 	for rows.Next() {
 		var user entity.User
-		if err := rows.Scan(&user); err != nil {
-			return nil, errors.Wrap(err, "AuthStoragePsql.FindUsersByName.Scan")
+		if err := rows.StructScan(&user); err != nil {
+			return nil, errors.Wrap(err, "AuthStoragePsql.FindUsersByName.StructScan")
 		}
 		users = append(users, &user)
 	}
@@ -130,17 +129,10 @@ func (a *AuthStorage) FindUsersByName(ctx context.Context,
 
 // Get users
 func (a *AuthStorage) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*entity.UsersList, error) {
-	// Start a transaction to ensure user count
-	tx, err := a.psql.Begin(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "AuthStoragePsql.GetUsers.Begin")
-	}
-	defer tx.Rollback(ctx)
 
 	var totalCount int
-	err = tx.QueryRow(ctx, getTotal).Scan(&totalCount)
-	if err != nil {
-		return nil, errors.Wrap(err, "AuthStoragePsql.GetUsers.QueryRow")
+	if err := a.psql.GetContext(ctx, &totalCount, getTotal); err != nil {
+		return nil, errors.Wrap(err, "AuthStoragePsql.GetUsers.GetContext")
 	}
 
 	if totalCount == 0 {
@@ -154,23 +146,16 @@ func (a *AuthStorage) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (
 		}, nil
 	}
 
-	rows, err := tx.Query(ctx, getUsers, pq.GetDifference(), pq.GetOrderBy(), pq.GetLimit())
-	if err != nil {
-		return nil, errors.Wrap(err, "AuthStoragePsql.GetUsers.Query")
-	}
-	defer rows.Close()
-
 	users := make([]*entity.User, 0, pq.GetSize())
-	for rows.Next() {
-		var user entity.User
-		if err := rows.Scan(&user); err != nil {
-			return nil, errors.Wrap(err, "AuthStoragePsql.GetUsers.Scan")
-		}
-		users = append(users, &user)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, errors.Wrap(err, "AuthStoragePsql.GetUsers.rows.Err")
+	if err := a.psql.SelectContext(
+		ctx,
+		&users,
+		getUsers,
+		pq.GetOrderBy(),
+		pq.GetDifference(),
+		pq.GetLimit(),
+	); err != nil {
+		return nil, errors.Wrap(err, "AuthStorage.GetUsers.SelectContext")
 	}
 
 	return &entity.UsersList{
@@ -186,8 +171,8 @@ func (a *AuthStorage) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (
 // Find user by email
 func (a *AuthStorage) FindUserByEmail(ctx context.Context, user *entity.User) (*entity.User, error) {
 	foundUser := &entity.User{}
-	if err := a.psql.QueryRow(ctx, findUserByEmail, user.Email).Scan(foundUser); err != nil {
-		return nil, errors.Wrap(err, "AuthStoragePsql.FindUserByEmail.QueryRow")
+	if err := a.psql.QueryRowxContext(ctx, findUserByEmail, user.Email).StructScan(foundUser); err != nil {
+		return nil, errors.Wrap(err, "AuthStoragePsql.FindUserByEmail.StructScan")
 	}
 	return foundUser, nil
 }

@@ -1,8 +1,19 @@
 package psql
 
 import (
-	"github.com/jackc/pgx/v4/pgxpool"
+	"context"
+	"database/sql"
+
+	"github.com/jmoiron/sqlx"
 )
+
+type PgxClient interface {
+	QueryRowxContext(ctx context.Context, query string, args ...interface{}) *sqlx.Row
+	GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	QueryxContext(ctx context.Context, query string, args ...interface{}) (*sqlx.Rows, error)
+	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+}
 
 type Storage struct {
 	Auth     *AuthStorage
@@ -10,7 +21,7 @@ type Storage struct {
 	Comments *CommentsStorage
 }
 
-func NewStorage(psql *pgxpool.Pool) *Storage {
+func NewStorage(psql PgxClient) *Storage {
 	return &Storage{
 		Auth:     NewAuthStorage(psql),
 		News:     NewNewsStorage(psql),

@@ -7,10 +7,7 @@ const (
 	
 	deleteComment = `DELETE FROM comments WHERE comment_id = $1`
 
-	updateComment = `UPDATE comments
-				SET message = $1, updated_at = CURRENT_TIMESTAMP 
-				WHERE comment_id = $2 
-				RETURNING *`
+	updateComment = `UPDATE comments SET message = $1, updated_at = CURRENT_TIMESTAMP WHERE comment_id = $2 RETURNING *`
 
 	getCommentByID = `SELECT concat(u.first_name, ' ', u.last_name) as author, u.avatar as avatar_url, c.message, c.likes, c.updated_at, c.author_id, c.comment_id	
 				FROM comments c
