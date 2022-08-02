@@ -13,10 +13,15 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	prefix = "api-session:"
+)
+
 // Session storage
 type SessionStorage struct {
 	redis  *redis.Client
 	config *config.Config
+	prefix string
 }
 
 // Session storage constructor
@@ -32,10 +37,10 @@ func (s *SessionStorage) CreateSession(ctx context.Context, session *entity.Sess
 
 	sessionBytes, err := json.Marshal(&session)
 	if err != nil {
-		return "" , errors.Wrap(err, "SessionStorage.CreateSession.Marshal")
+		return "", errors.Wrap(err, "SessionStorage.CreateSession.Marshal")
 	}
 	if err = s.redis.Set(ctx, sessionKey, sessionBytes, time.Second*time.Duration(expire)).Err(); err != nil {
-		return "" , errors.Wrap(err, "SessionStorage.CreateSession.Set")
+		return "", errors.Wrap(err, "SessionStorage.CreateSession.Set")
 	}
 
 	return sessionKey, nil
@@ -50,7 +55,7 @@ func (s *SessionStorage) GetSessionByID(ctx context.Context, sessionID string) (
 
 	session := &entity.Session{}
 	if err = json.Unmarshal(sessionBytes, session); err != nil {
-		return nil, errors.Wrap(err, "SessionStorage.GetSessionByID.Get") 
+		return nil, errors.Wrap(err, "SessionStorage.GetSessionByID.Get")
 	}
 
 	return session, nil
@@ -65,5 +70,5 @@ func (s *SessionStorage) DeleteSessionByID(ctx context.Context, sessionID string
 }
 
 func (s *SessionStorage) createSessionKey(sessionID string) string {
-	return fmt.Sprintf("%s: %s", s.config.Session.Prefix, sessionID)
-} 
+	return fmt.Sprintf("%s: %s", s.prefix, sessionID)
+}
