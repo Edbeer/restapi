@@ -9,7 +9,7 @@ import (
 )
 
 // Session redis storage interface
-type SessionStorage interface {
+type SessionRedis interface {
 	CreateSession(ctx context.Context, session *entity.Session, expire int) (string, error)
 	GetSessionByID(ctx context.Context, sessionID string) (*entity.Session, error)
 	DeleteSessionByID(ctx context.Context, sessionID string) error
@@ -19,11 +19,11 @@ type SessionStorage interface {
 type SessionService struct {
 	config         *config.Config
 	logger         logger.Logger
-	sessionStorage SessionStorage
+	sessionStorage SessionRedis
 }
 
 // SessionService constructor
-func NewSessionService(config *config.Config, sessionStorage SessionStorage, logger logger.Logger) *SessionService {
+func NewSessionService(config *config.Config, sessionStorage SessionRedis, logger logger.Logger) *SessionService {
 	return &SessionService{
 		config:         config,
 		logger:         logger,
