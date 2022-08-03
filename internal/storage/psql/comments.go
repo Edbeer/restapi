@@ -7,16 +7,17 @@ import (
 	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/Edbeer/restapi/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
 
 // Comments storage
 type CommentsStorage struct {
-	psql PgxClient
+	psql *sqlx.DB
 }
 
 // Comments storage constructor
-func NewCommentsStorage(psql PgxClient) *CommentsStorage {
+func NewCommentsStorage(psql *sqlx.DB) *CommentsStorage {
 	return &CommentsStorage{psql: psql}
 }
 

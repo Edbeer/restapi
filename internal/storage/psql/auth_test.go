@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_Register(t *testing.T) {
+func TestPsql_Register(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -63,7 +63,7 @@ func Test_Register(t *testing.T) {
 	})
 }
 
-func Test_Update(t *testing.T) {
+func TestPsql_Update(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -113,7 +113,7 @@ func Test_Update(t *testing.T) {
 	})
 }
 
-func Test_Delete(t *testing.T) {
+func TestPsql_Delete(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -144,7 +144,7 @@ func Test_Delete(t *testing.T) {
 	})
 }
 
-func Test_GetUserByID(t *testing.T) {
+func TestPsql_GetUserByID(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -189,7 +189,7 @@ func Test_GetUserByID(t *testing.T) {
 	})
 }
 
-func Test_FindUserByName(t *testing.T) {
+func TestPsql_FindUserByName(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -234,7 +234,7 @@ func Test_FindUserByName(t *testing.T) {
 	})
 }
 
-func Test_GetUsers(t *testing.T) {
+func TestPsql_GetUsers(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -278,7 +278,7 @@ func Test_GetUsers(t *testing.T) {
 	})
 }
 
-func Test_GetUserByEmail(t *testing.T) {
+func TestPsql_GetUserByEmail(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))

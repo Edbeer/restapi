@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_Create(t *testing.T) {
+func TestPsql_Create(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -74,7 +74,7 @@ func Test_Create(t *testing.T) {
 	})
 }
 
-func Test_UpdateComment(t *testing.T) {
+func TestPsql_UpdateComment(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -131,7 +131,7 @@ func Test_UpdateComment(t *testing.T) {
 	})
 }
 
-func Test_DeleteComment(t *testing.T) {
+func TestPsql_DeleteComment(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -161,7 +161,7 @@ func Test_DeleteComment(t *testing.T) {
 	})
 }
 
-func Test_GetCommentByID(t *testing.T) {
+func TestPsql_GetCommentByID(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -199,7 +199,7 @@ func Test_GetCommentByID(t *testing.T) {
 	})
 }
 
-func Test_GetAllByNewsID(t *testing.T) {
+func TestPsql_GetAllByNewsID(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))

@@ -26,7 +26,7 @@ func SetupAuthRedis() *AuthStorage {
 }
 
 
-func Test_SetUserCtx(t *testing.T) {
+func TestRedis_SetUserCtx(t *testing.T) {
 	t.Parallel()
 
 	authRedisStorage := SetupAuthRedis()
@@ -46,7 +46,7 @@ func Test_SetUserCtx(t *testing.T) {
 	})
 }
 
-func Test_GetByIDCtx(t *testing.T) {
+func TestRedis_GetByIDCtx(t *testing.T) {
 	t.Parallel()
 
 	authRedisStorage := SetupAuthRedis()
@@ -70,7 +70,7 @@ func Test_GetByIDCtx(t *testing.T) {
 	})
 }
 
-func Test_DeleteUserCtx(t *testing.T) {
+func TestRedis_DeleteUserCtx(t *testing.T) {
 	t.Parallel()
 
 	authRedisStorage := SetupAuthRedis()

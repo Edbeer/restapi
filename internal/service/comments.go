@@ -6,7 +6,6 @@ import (
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
-	"github.com/Edbeer/restapi/internal/storage/psql"
 	"github.com/Edbeer/restapi/pkg/httpe"
 	"github.com/Edbeer/restapi/pkg/logger"
 	"github.com/Edbeer/restapi/pkg/utils"
@@ -15,7 +14,7 @@ import (
 )
 
 // Comments storage interface
-type CommentsStorage interface {
+type CommentsPsql interface {
 	Create(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
 	Update(ctx context.Context, comments *entity.Comment) (*entity.Comment, error)
 	GetByID(ctx context.Context, commentID uuid.UUID) (*entity.CommentBase, error)
@@ -27,11 +26,11 @@ type CommentsStorage interface {
 type CommentsService struct {
 	logger          logger.Logger
 	config          *config.Config
-	commentsStorage *psql.CommentsStorage
+	commentsStorage CommentsPsql
 }
 
 // Comments service constructor
-func NewCommentsService(config *config.Config, commentsStorage *psql.CommentsStorage, logger logger.Logger) *CommentsService {
+func NewCommentsService(config *config.Config, commentsStorage CommentsPsql, logger logger.Logger) *CommentsService {
 	return &CommentsService{config: config, commentsStorage: commentsStorage, logger: logger}
 }
 

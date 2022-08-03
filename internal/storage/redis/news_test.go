@@ -25,7 +25,7 @@ func SetupNewsRedis() *NewsStorage {
 	return newsRedisStorage 
 }
 
-func Test_SetNewsCtx(t *testing.T) {
+func TestRedis_SetNewsCtx(t *testing.T) {
 	t.Parallel()
 
 	newsRedisStorage := SetupNewsRedis()
@@ -43,7 +43,7 @@ func Test_SetNewsCtx(t *testing.T) {
 	})
 }
 
-func Test_GetNewsByIDCtx(t *testing.T) {
+func TestRedis_GetNewsByIDCtx(t *testing.T) {
 	t.Parallel()
 
 	newsRedisStorage := SetupNewsRedis()
@@ -71,7 +71,7 @@ func Test_GetNewsByIDCtx(t *testing.T) {
 	})
 }
 
-func Test_DeleteNewsCtx(t *testing.T) {
+func TestRedis_DeleteNewsCtx(t *testing.T) {
 	t.Parallel()
 
 	newsRedisStorage := SetupNewsRedis()

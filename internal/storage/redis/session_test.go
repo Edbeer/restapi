@@ -25,7 +25,7 @@ func SetupSessionRedis() *SessionStorage {
 	return sessionRedisStorage
 }
 
-func Test_CreateSession(t *testing.T) {
+func TestRedis_CreateSession(t *testing.T) {
 	t.Parallel()
 
 	sessionRedisStorage := SetupSessionRedis()
@@ -43,7 +43,7 @@ func Test_CreateSession(t *testing.T) {
 	})
 }
 
-func Test_GetSessionByID(t *testing.T) {
+func TestRedis_GetSessionByID(t *testing.T) {
 	t.Parallel()
 
 	sessionRedisStorage := SetupSessionRedis()
@@ -65,7 +65,7 @@ func Test_GetSessionByID(t *testing.T) {
 	})
 }
 
-func Test_DeleteSessionByID(t *testing.T) {
+func TestRedis_DeleteSessionByID(t *testing.T) {
 	t.Parallel()
 
 	sessionRedisStorage := SetupSessionRedis()

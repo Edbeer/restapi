@@ -7,16 +7,17 @@ import (
 	"github.com/Edbeer/restapi/internal/entity"
 	"github.com/Edbeer/restapi/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
 
 // Auth Storage
 type AuthStorage struct {
-	psql PgxClient
+	psql *sqlx.DB
 }
 
 // Auth Storage constructor
-func NewAuthStorage(psql PgxClient) *AuthStorage {
+func NewAuthStorage(psql *sqlx.DB) *AuthStorage {
 	return &AuthStorage{psql: psql}
 }
 

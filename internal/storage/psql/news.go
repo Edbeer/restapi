@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
 	"github.com/Edbeer/restapi/internal/entity"
@@ -12,11 +13,11 @@ import (
 )
 
 type NewsStorage struct {
-	psql PgxClient
+	psql *sqlx.DB
 }
 
 // News storage constructor
-func NewNewsStorage(psql PgxClient) *NewsStorage {
+func NewNewsStorage(psql *sqlx.DB) *NewsStorage {
 	return &NewsStorage{psql: psql}
 }
 

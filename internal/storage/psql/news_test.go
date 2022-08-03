@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_CreateNews(t *testing.T) {
+func TestPsql_CreateNews(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -57,7 +57,7 @@ func Test_CreateNews(t *testing.T) {
 	})
 }
 
-func Test_UpdateNews(t *testing.T) {
+func TestPsql_UpdateNews(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -108,7 +108,7 @@ func Test_UpdateNews(t *testing.T) {
 	})
 }
 
-func Test_GetNews(t *testing.T) {
+func TestPsql_GetNews(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -156,7 +156,7 @@ func Test_GetNews(t *testing.T) {
 	})
 }
 
-func Test_DeleteNews(t *testing.T) {
+func TestPsql_DeleteNews(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -183,7 +183,7 @@ func Test_DeleteNews(t *testing.T) {
 	})
 }
 
-func Test_GetNewsByID(t *testing.T) {
+func TestPsql_GetNewsByID(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -224,7 +224,7 @@ func Test_GetNewsByID(t *testing.T) {
 	})
 }
 
-func Test_SearchNews(t *testing.T) {
+func TestPsql_SearchNews(t *testing.T) {
 	t.Parallel()
 
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
