@@ -13,6 +13,8 @@ require (
 	go.uber.org/zap v1.21.0
 )
 
+require github.com/golang/mock v1.6.0
+
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect

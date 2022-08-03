@@ -88,7 +88,7 @@ func (n *NewsService) Update(ctx context.Context, news *entity.News) (*entity.Ne
 	if err != nil {
 		return nil, err
 	}
-	if err := n.storageRedis.DeleteNewsCtx(ctx, news.NewsID.String()); err != nil {
+	if err := n.storageRedis.DeleteNewsCtx(ctx, n.generateNewsKey(news.NewsID.String())); err != nil {
 		n.logger.Errorf("NewsService.Update.DeleteNewsCtx: %v", err)
 	}
 	return updatedNews, err
@@ -109,7 +109,7 @@ func (n *NewsService) Delete(ctx context.Context, newsID uuid.UUID) error {
 		return err
 	}
 
-	if err := n.storageRedis.DeleteNewsCtx(ctx, newsID.String()); err != nil {
+	if err := n.storageRedis.DeleteNewsCtx(ctx, n.generateNewsKey(newsID.String())); err != nil {
 		n.logger.Errorf("NewsService.Delete.DeleteNewsCtx: %v", err)
 	}
 	return nil
@@ -139,7 +139,7 @@ func (n *NewsService) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entit
 		return nil, err
 	}
 
-	if err := n.storageRedis.SetNewsCtx(ctx, newsID.String(), cacheNewsDuration, news); err != nil {
+	if err := n.storageRedis.SetNewsCtx(ctx, n.generateNewsKey(newsID.String()), cacheNewsDuration, news); err != nil {
 		n.logger.Errorf("NewsService.GetNewsByID.SetNewsCtx: %v", err)
 	}
 
@@ -147,7 +147,7 @@ func (n *NewsService) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entit
 }
 
 // Find news by title
-func (n *NewsService) SearchNews(ctx context.Context, pq *utils.PaginationQuery, title string) (*entity.NewsList, error) {
+func (n *NewsService) SearchNews(ctx context.Context, title string, pq *utils.PaginationQuery) (*entity.NewsList, error) {
 	news, err := n.storagePsql.SearchNews(ctx, title, pq)
 	if err != nil {
 		return nil, err

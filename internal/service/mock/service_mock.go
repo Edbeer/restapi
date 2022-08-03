@@ -224,18 +224,18 @@ func (mr *MockNewsMockRecorder) GetNewsByID(ctx, newsID interface{}) *gomock.Cal
 }
 
 // SearchNews mocks base method.
-func (m *MockNews) SearchNews(ctx context.Context, pq *utils.PaginationQuery, title string) (*entity.NewsList, error) {
+func (m *MockNews) SearchNews(ctx context.Context, title string, pq *utils.PaginationQuery) (*entity.NewsList, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchNews", ctx, pq, title)
+	ret := m.ctrl.Call(m, "SearchNews", ctx, title, pq)
 	ret0, _ := ret[0].(*entity.NewsList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SearchNews indicates an expected call of SearchNews.
-func (mr *MockNewsMockRecorder) SearchNews(ctx, pq, title interface{}) *gomock.Call {
+func (mr *MockNewsMockRecorder) SearchNews(ctx, title, pq interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchNews", reflect.TypeOf((*MockNews)(nil).SearchNews), ctx, pq, title)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchNews", reflect.TypeOf((*MockNews)(nil).SearchNews), ctx, title, pq)
 }
 
 // Update mocks base method.

@@ -20,8 +20,8 @@ type UsersList struct {
 // User model
 type User struct {
 	ID          uuid.UUID `json:"user_id" db:"user_id" redis:"user_id" validate:"omitempty,uuid"`
-	FirstName   string    `json:"first_name" db:"first_name" redis:"first_name" validate:"required,lte=30"`
-	LastName    string    `json:"last_name" db:"last_name" redis:"last_name" validate:"required,lte=30"`
+	FirstName   string    `json:"first_name" db:"first_name" redis:"first_name" validate:"required_with,lte=30"`
+	LastName    string    `json:"last_name" db:"last_name" redis:"last_name" validate:"required_with,lte=30"`
 	Email       string    `json:"email" db:"email" redis:"email" validate:"omitempty,lte=60,email"`
 	Password    string    `json:"password,omitempty" db:"password" redis:"password" validate:"required,gte=6"`
 	Role        *string   `json:"role" db:"role" redis:"role" validate:"omitempty,lte=10"`

@@ -19,7 +19,7 @@ type NewsService interface {
 	Update(ctx context.Context, news *entity.News) (*entity.News, error)
 	GetNews(ctx context.Context, pq *utils.PaginationQuery) (*entity.NewsList, error)
 	GetNewsByID(ctx context.Context, newsID uuid.UUID) (*entity.NewsBase, error)
-	SearchNews(ctx context.Context, pq *utils.PaginationQuery, title string) (*entity.NewsList, error)
+	SearchNews(ctx context.Context, title string, pq *utils.PaginationQuery) (*entity.NewsList, error)
 	Delete(ctx context.Context, newsID uuid.UUID) error
 }
 
@@ -208,7 +208,7 @@ func (h *NewsHandler) SearchNews() echo.HandlerFunc {
 
 		title := c.QueryParam("title")
 
-		newsList, err := h.newsService.SearchNews(ctx, pq, title)
+		newsList, err := h.newsService.SearchNews(ctx, title, pq)
 		if err != nil {
 			return c.JSON(httpe.ErrorResponse(err))
 		}
