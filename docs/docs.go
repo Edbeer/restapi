@@ -827,6 +827,7 @@ const docTemplate = `{
         "entity.News": {
             "type": "object",
             "required": [
+                "author_id",
                 "content",
                 "title"
             ],
@@ -890,8 +891,7 @@ const docTemplate = `{
         "entity.User": {
             "type": "object",
             "required": [
-                "first_name",
-                "last_name"
+                "password"
             ],
             "properties": {
                 "address": {
@@ -926,6 +926,10 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string",
                     "maxLength": 30
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
                 },
                 "phone_number": {
                     "type": "string",
@@ -989,7 +993,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
+	Version:          "1.1",
 	Host:             "",
 	BasePath:         "/api/",
 	Schemes:          []string{},

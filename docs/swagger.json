@@ -4,7 +4,7 @@
         "description": "This is an example of an implementation RESTApi",
         "title": "restapi",
         "contact": {},
-        "version": "1.0"
+        "version": "1.1"
     },
     "basePath": "/api/",
     "paths": {
@@ -819,6 +819,7 @@
         "entity.News": {
             "type": "object",
             "required": [
+                "author_id",
                 "content",
                 "title"
             ],
@@ -882,8 +883,7 @@
         "entity.User": {
             "type": "object",
             "required": [
-                "first_name",
-                "last_name"
+                "password"
             ],
             "properties": {
                 "address": {
@@ -918,6 +918,10 @@
                 "last_name": {
                     "type": "string",
                     "maxLength": 30
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
                 },
                 "phone_number": {
                     "type": "string",

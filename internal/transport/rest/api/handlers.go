@@ -2,14 +2,14 @@ package api
 
 import (
 	"github.com/Edbeer/restapi/config"
-	"github.com/Edbeer/restapi/docs"
 	middle "github.com/Edbeer/restapi/internal/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"github.com/Edbeer/restapi/pkg/csrf"
 	"github.com/Edbeer/restapi/pkg/logger"
+	"github.com/Edbeer/restapi/docs"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/swaggo/echo-swagger"
 )
 
 type Deps struct {

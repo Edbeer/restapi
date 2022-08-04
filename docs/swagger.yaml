@@ -84,6 +84,7 @@ definitions:
       updated_at:
         type: string
     required:
+    - author_id
     - content
     - title
     type: object
@@ -130,6 +131,9 @@ definitions:
       last_name:
         maxLength: 30
         type: string
+      password:
+        minLength: 6
+        type: string
       phone_number:
         maxLength: 20
         type: string
@@ -144,8 +148,7 @@ definitions:
       user_id:
         type: string
     required:
-    - first_name
-    - last_name
+    - password
     type: object
   entity.UsersList:
     properties:
@@ -175,7 +178,7 @@ info:
   contact: {}
   description: This is an example of an implementation RESTApi
   title: restapi
-  version: "1.0"
+  version: "1.1"
 paths:
   /auth/{id}:
     delete:

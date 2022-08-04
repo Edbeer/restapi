@@ -9,7 +9,7 @@ import (
 )
 
 // @title           restapi
-// @version         1.0
+// @version         1.1
 // @description     This is an example of an implementation RESTApi
 
 // @BasePath /api/
