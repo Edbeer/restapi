@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"net/http"
-	"time"
 
 	"github.com/Edbeer/restapi/config"
 	"github.com/Edbeer/restapi/internal/entity"
@@ -18,13 +17,6 @@ func GetRequestID(c echo.Context) string {
 
 // ReqIDCtxKey is a key used for the Request ID from context
 type ReqIDCtxKey struct{}
-
-// Get ctx with timeout and request id from echo context
-func GetCtxWithReqID(c echo.Context) (context.Context, context.CancelFunc) {
-	ctx, cancel := context.WithTimeout(c.Request().Context(), 5*time.Second)
-	ctx = context.WithValue(ctx, ReqIDCtxKey{}, GetRequestID(c))
-	return ctx, cancel
-}
 
 // Configure JWT cookie
 func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
@@ -81,4 +73,17 @@ func GetUserFromCtx(ctx context.Context) (*entity.User, error) {
 // Get user IP address
 func GetIP(c echo.Context) string {
 	return c.Request().RemoteAddr
+}
+
+// Get context  with request id
+func GetRequestCtx(c echo.Context) context.Context {
+	return context.WithValue(c.Request().Context(), ReqIDCtxKey{}, GetRequestID(c))
+}
+
+// Read request body and validate
+func ReadRequest(ctx echo.Context, request interface{}) error {
+	if err := ctx.Bind(request); err != nil {
+		return err
+	}
+	return validate.StructCtx(ctx.Request().Context(), request)
 }

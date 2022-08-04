@@ -35,19 +35,19 @@ type SessionService interface {
 
 // AuthHandler
 type AuthHandler struct {
+	config         *config.Config
 	authService    AuthService
 	sessionService SessionService
-	config         *config.Config
 	logger         logger.Logger
 }
 
 // AuthHandler constructor
-func NewAuthHandler(authService AuthService, config *config.Config, logger logger.Logger, sessionService SessionService) *AuthHandler {
+func NewAuthHandler(config *config.Config, authService AuthService, sessionService SessionService, logger logger.Logger) *AuthHandler {
 	return &AuthHandler{
-		authService:    authService,
 		config:         config,
-		logger:         logger,
+		authService:    authService,
 		sessionService: sessionService,
+		logger:         logger,
 	}
 }
 
@@ -61,12 +61,11 @@ func NewAuthHandler(authService AuthService, config *config.Config, logger logge
 // @Router /auth/register [post]
 func (h *AuthHandler) Register() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		user := &entity.User{}
-		if err := c.Bind(user); err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+		if err := utils.ReadRequest(c, user); err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
 		}
 
 		createdUser, err := h.authService.Register(ctx, user)
@@ -98,8 +97,7 @@ func (h *AuthHandler) Register() echo.HandlerFunc {
 // @Router /auth/{id} [put]
 func (h *AuthHandler) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
@@ -134,8 +132,7 @@ func (h *AuthHandler) Update() echo.HandlerFunc {
 // @Router /auth/{id} [delete]
 func (h *AuthHandler) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
@@ -162,8 +159,7 @@ func (h *AuthHandler) Delete() echo.HandlerFunc {
 // @Router /auth/{id} [get]
 func (h *AuthHandler) GetUserByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
@@ -191,8 +187,7 @@ func (h *AuthHandler) GetUserByID() echo.HandlerFunc {
 // @Router /auth/find [get]
 func (h *AuthHandler) FindUsersByName() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		if c.QueryParam("name") == "" {
 			return c.JSON(http.StatusBadRequest, httpe.NewBadRequestError("name query param is required"))
@@ -226,8 +221,7 @@ func (h *AuthHandler) FindUsersByName() echo.HandlerFunc {
 // @Router /auth/all [get]
 func (h *AuthHandler) GetUsers() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
@@ -257,10 +251,12 @@ func (h *AuthHandler) Login() echo.HandlerFunc {
 		Password string `json:"password,omitempty" db:"password" validate:"required,gte=6"`
 	}
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		login := &Login{}
+		if err := utils.ReadRequest(c, login); err != nil {
+			return c.JSON(httpe.ErrorResponse(err))
+		}
 		userWithToken, err := h.authService.Login(ctx, &entity.User{
 			Email:    login.Email,
 			Password: login.Password,
@@ -289,8 +285,7 @@ func (h *AuthHandler) Login() echo.HandlerFunc {
 // @Router /auth/logout [post]
 func (h *AuthHandler) Logout() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		cookie, err := c.Cookie("session-id")
 		if err != nil {

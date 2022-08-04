@@ -29,7 +29,7 @@ type Handlers struct {
 
 func NewHandlers(deps Deps) *Handlers {
 	return &Handlers{
-		auth:     NewAuthHandler(deps.AuthService, deps.Config, deps.Logger, deps.SessionService),
+		auth:     NewAuthHandler(deps.Config, deps.AuthService, deps.SessionService, deps.Logger),
 		news:     NewNewsHandler(deps.NewsService, deps.Config, deps.Logger),
 		comments: NewCommentsHandler(deps.CommentsService, deps.Config, deps.Logger),
 	}

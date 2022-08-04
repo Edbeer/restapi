@@ -49,8 +49,7 @@ func NewCommentsHandler(commentsService CommentsService, config *config.Config, 
 // @Router /comments [post]
 func (h *CommentsHandler) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		user, err := utils.GetUserFromCtx(ctx)
 		if err != nil {
@@ -84,8 +83,7 @@ func (h *CommentsHandler) Update() echo.HandlerFunc {
 		Likes   int64  `json:"likes" db:"likes" validate:"omitempty"`
 	}
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		commentUUID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
@@ -119,8 +117,7 @@ func (h *CommentsHandler) Update() echo.HandlerFunc {
 // @Router /comments/{id} [delete]
 func (h *CommentsHandler) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		commentUUID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
@@ -147,8 +144,7 @@ func (h *CommentsHandler) Delete() echo.HandlerFunc {
 // @Router /comments/{id} [get]
 func (h *CommentsHandler) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		commentID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
@@ -179,8 +175,7 @@ func (h *CommentsHandler) GetByID() echo.HandlerFunc {
 // @Router /comments/byNewsId/{id} [get]
 func (h *CommentsHandler) GetAllByNewsID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		newsID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
