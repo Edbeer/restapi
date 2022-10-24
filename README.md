@@ -1,4 +1,4 @@
-### Golang Clean Architecture REST API example 🚀
+### Golang Clean Architecture REST API example
 
 #### Full list what has been used:
 * [echo](https://github.com/labstack/echo) - Web framework
